@@ -30,6 +30,7 @@ const EMOJI_OPTIONS = ['💬', '📦', '⚠️', '⚙️', '🙋', '🚻', '🔄
 export const PersistentLiveConversation: React.FC = () => {
   const {
     state,
+    setScreen,
     toggleLiveMic,
     sendLiveMessage,
     summarizeLiveConversation,
@@ -74,12 +75,11 @@ export const PersistentLiveConversation: React.FC = () => {
 
   const getSpeechLang = () => {
     switch (language) {
-      case 'en': return 'en-US';
-      case 'ja': return 'ja-JP';
-      case 'ko': return 'ko-KR';
-      case 'zh': return 'zh-CN';
       case 'vi':
-      default: return 'vi-VN';
+        return 'vi-VN';
+      case 'en':
+      default:
+        return 'en-US';
     }
   };
 
@@ -312,9 +312,64 @@ export const PersistentLiveConversation: React.FC = () => {
     setIsAddingOption(false);
   };
 
+  // IF LEADER IS ACTIVE: Supervisor does NOT need a persistent subtitle window.
+  // Instead, provide a clean floating Worker Request card when Minh asks for assistance!
+  if (isLeader) {
+    const hasWorkerInquiry =
+      state.lifecycleStage === 'worker_sent' ||
+      (state.workerQuestion && !state.isDestinationUpdated);
+
+    if (!hasWorkerInquiry) {
+      return null;
+    }
+
+    return (
+      <aside
+        aria-label={language === 'vi' ? 'Thông báo yêu cầu từ công nhân' : 'Worker request alert'}
+        className="fixed bottom-4 right-4 z-30 max-w-md bg-white/95 backdrop-blur-md rounded-2xl border-2 border-amber-400 shadow-2xl p-4 animate-in slide-in-from-bottom-3 duration-200 select-none ring-4 ring-amber-400/20"
+      >
+        <div className="flex items-start gap-3">
+          <div className="w-10 h-10 rounded-2xl bg-amber-100 text-amber-900 flex items-center justify-center text-xl shrink-0 font-bold shadow-2xs">
+            🔔
+          </div>
+          <div className="space-y-1.5 flex-1 min-w-0">
+            <div className="flex items-center justify-between">
+              <span className="font-extrabold text-xs text-slate-900">
+                {language === 'vi' ? 'Yêu cầu từ Minh (Trạm 04)' : 'Worker Request from Minh (Line A)'}
+              </span>
+              <span className="text-[10px] font-bold text-amber-800 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-300">
+                {language === 'vi' ? 'Cần duyệt' : 'Action Needed'}
+              </span>
+            </div>
+            <p className="text-xs text-slate-700 leading-snug font-medium line-clamp-2">
+              &ldquo;{state.workerQuestion || (language === 'vi' ? 'Khay A đã đầy, xin chỉ đạo đổi sang Khay B!' : 'Can we use Tray B instead of Tray A?')}&rdquo;
+            </p>
+            <div className="pt-1.5 flex items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setScreen('facilitator')}
+                className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-extrabold transition shadow-2xs flex items-center gap-1.5"
+              >
+                <span>{language === 'vi' ? 'Vào Workspace duyệt đổi sang Khay B' : 'Open Workspace to Review & Approve'}</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => handleSpeakText(state.workerQuestion || 'Minh cần hỗ trợ đổi sang Khay B')}
+                className="p-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-600 transition"
+                title={language === 'vi' ? 'Nghe lại phát âm qua loa (TTS)' : 'Replay audio (TTS)'}
+              >
+                <Volume2 className="w-4 h-4" />
+              </button>
+            </div>
+          </div>
+        </div>
+      </aside>
+    );
+  }
+
   return (
     <>
-      {/* FLOATING PERSISTENT LIVE CONVERSATION WIDGET */}
+      {/* FLOATING PERSISTENT LIVE CONVERSATION WIDGET FOR DEAF WORKER */}
       <div
         id="persistent-live-conversation"
         className={`fixed bottom-3 right-4 z-30 select-none transition-all duration-300 ${
@@ -322,21 +377,13 @@ export const PersistentLiveConversation: React.FC = () => {
         }`}
       >
         <div className="bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200/90 shadow-xl overflow-hidden ring-1 ring-slate-900/5">
-          {/* TOP BAR: Role-Adaptive Bar (Leader vs Worker) */}
-          <div className={`px-3.5 py-2.5 flex items-center justify-between gap-2.5 border-b transition-colors ${
-            isLeader
-              ? 'bg-gradient-to-r from-amber-50/95 via-orange-50/70 to-white border-amber-200/80'
-              : 'bg-gradient-to-r from-blue-50/95 via-indigo-50/60 to-white border-slate-200/80'
-          }`}>
-            {/* Left: Role Tag & Live STT/TTS indicator */}
+          {/* TOP BAR: Clean, Dedicated Worker Communication Bar */}
+          <div className="px-3.5 py-2.5 flex items-center justify-between gap-2.5 border-b bg-gradient-to-r from-blue-50/95 via-indigo-50/60 to-white border-slate-200/80">
+            {/* Left: Live status with Sound Level Visualizer */}
             <div className="flex items-center gap-2 min-w-0">
               <div
                 className="relative shrink-0 flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white border border-slate-200 shadow-2xs"
-                title={
-                  isLeader
-                    ? 'Quản lý An: Nói vào mic để hiện phụ đề cho Minh; nhận âm thanh TTS từ Minh'
-                    : 'Công nhân Minh: Nhận diện giọng nói thành phụ đề & Trợ thị'
-                }
+                title={state.isLiveMicActive ? 'Mic đang bật' : 'Nhận diện giọng nói & Phụ đề'}
               >
                 <span className="flex h-2 w-2 relative">
                   {state.isLiveMicActive && (
@@ -349,23 +396,14 @@ export const PersistentLiveConversation: React.FC = () => {
                   />
                 </span>
                 <span className="text-[11px] font-extrabold text-slate-800 tracking-tight">
-                  {isLeader ? (state.isLiveMicActive ? 'Mic Lệnh BẬT' : 'Cầu lệnh An') : (state.isLiveMicActive ? 'Live STT' : 'Phụ đề Minh')}
+                  {state.isLiveMicActive
+                    ? (language === 'vi' ? 'Live STT (Đang nghe)' : 'Live STT (Listening)')
+                    : (language === 'vi' ? 'Phụ đề trực tiếp' : 'Live Captions')}
                 </span>
               </div>
 
-              {/* Leader Audio Monitor Badge */}
-              {isLeader && (
-                <div
-                  className="hidden sm:flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10px] font-bold"
-                  title="Loa TTS tự động phát to khi Minh bấm câu phản hồi nhanh"
-                >
-                  <Headphones className="w-3 h-3 text-emerald-600" />
-                  <span>Loa TTS: BẬT</span>
-                </div>
-              )}
-
               {/* Sound Level Visualizer for Worker (Đo độ ồn xưởng) */}
-              {state.isLiveMicActive && !isLeader && (
+              {state.isLiveMicActive && (
                 <div
                   className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold transition border ${
                     noiseStatus === 'loud'

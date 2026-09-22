@@ -1,4 +1,4 @@
-export type SupportedLanguage = 'vi' | 'en' | 'ja' | 'ko' | 'zh';
+export type SupportedLanguage = 'vi' | 'en';
 
 export interface LanguageOption {
   code: SupportedLanguage;
@@ -22,26 +22,5 @@ export const SUPPORTED_LANGUAGES: LanguageOption[] = [
     nativeName: 'English (US)',
     flag: '🇺🇸',
     shortLabel: 'EN',
-  },
-  {
-    code: 'ja',
-    name: 'Japanese',
-    nativeName: '日本語',
-    flag: '🇯🇵',
-    shortLabel: 'JA',
-  },
-  {
-    code: 'ko',
-    name: 'Korean',
-    nativeName: '한국어',
-    flag: '🇰🇷',
-    shortLabel: 'KO',
-  },
-  {
-    code: 'zh',
-    name: 'Chinese',
-    nativeName: '中文 (简体)',
-    flag: '🇨🇳',
-    shortLabel: 'ZH',
   },
 ];

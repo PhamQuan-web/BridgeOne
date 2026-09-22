@@ -19,7 +19,7 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
     if (typeof window !== 'undefined') {
       try {
         const saved = localStorage.getItem(STORAGE_LANG_KEY);
-        if (saved && ['vi', 'en', 'ja', 'ko', 'zh'].includes(saved)) {
+        if (saved && ['vi', 'en'].includes(saved)) {
           return saved as SupportedLanguage;
         }
       } catch {

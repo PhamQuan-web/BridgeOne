@@ -70,7 +70,7 @@ export const WorkerTaskDetailScreen: React.FC = () => {
         const recognition = new SpeechRecognition();
         recognition.continuous = true;
         recognition.interimResults = true;
-        recognition.lang = language === 'vi' ? 'vi-VN' : language === 'ja' ? 'ja-JP' : language === 'ko' ? 'ko-KR' : language === 'zh' ? 'zh-CN' : 'en-US';
+        recognition.lang = language === 'vi' ? 'vi-VN' : 'en-US';
 
         recognition.onresult = (event: any) => {
           let text = '';
