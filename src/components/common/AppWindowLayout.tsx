@@ -90,11 +90,11 @@ export const AppWindowLayout: React.FC<{ children: React.ReactNode }> = ({ child
         </div>
       </header>
 
-      {/* LEFT SIDEBAR (Normalized w-56, clean, high-contrast, collapsible for Focus Mode) */}
+      {/* LEFT SIDEBAR (Consolidated to Core Hubs, w-64, high-contrast, collapsible) */}
       <aside
         className={`fixed inset-y-0 left-0 z-40 bg-white border-r border-slate-200/90 flex flex-col justify-between select-none transform transition-all duration-200 ease-in-out md:static ${
-          mobileMenuOpen ? 'translate-x-0 shadow-2xl w-56 p-4' : '-translate-x-full md:translate-x-0'
-        } ${isSidebarCollapsed ? 'md:w-16 md:p-3' : 'md:w-56 md:p-4'}`}
+          mobileMenuOpen ? 'translate-x-0 shadow-2xl w-64 p-4' : '-translate-x-full md:translate-x-0'
+        } ${isSidebarCollapsed ? 'md:w-18 md:p-3' : 'md:w-64 md:p-4'}`}
       >
         <div className="space-y-6">
           {/* Logo */}
@@ -105,7 +105,7 @@ export const AppWindowLayout: React.FC<{ children: React.ReactNode }> = ({ child
               title="BridgeOne"
             >
               {isSidebarCollapsed ? (
-                <div className="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-black text-lg shadow-sm">
+                <div className="w-11 h-11 rounded-xl bg-blue-600 flex items-center justify-center text-white font-black text-xl shadow-sm">
                   B
                 </div>
               ) : (
@@ -116,49 +116,40 @@ export const AppWindowLayout: React.FC<{ children: React.ReactNode }> = ({ child
               onClick={() => setMobileMenuOpen(false)}
               className="md:hidden text-slate-400 hover:text-slate-700"
             >
-              <X className="w-5 h-5" />
+              <X className="w-6 h-6" />
             </button>
           </div>
 
-          {/* Navigation links normalized to Phase 0 specifications */}
-          <nav aria-label="Main Navigation" className="space-y-1.5 pt-1">
+          {/* Navigation links - Consolidated 5 Core Hubs */}
+          <nav aria-label="Main Navigation" className="space-y-2 pt-1">
             {isFacilitator ? (
-              /* Facilitator Navigation:
-                 Home, Instructions, Messages, Team, Resources, Settings */
+              /* Facilitator Navigation (Lead):
+                 1. Dashboard (Home)
+                 2. SOP Management (Facilitator)
+                 3. Verification Audit (Accountability)
+                 4. Messages
+                 5. Team & SOP Docs (Team / Resources)
+                 6. Settings */
               <>
                 <button
                   id="nav-lead-home"
                   onClick={() => handleNavClick('home')}
-                  title={t('nav.home', 'Home')}
-                  className={`w-full min-h-[48px] flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'gap-3 px-3.5'} py-2.5 rounded-xl text-xs font-semibold transition ${
+                  title={t('nav.home', 'Tổng quan ca trực')}
+                  className={`w-full min-h-[50px] flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'gap-3.5 px-3.5'} py-3 rounded-xl text-sm font-semibold transition ${
                     state.currentScreen === 'home'
                       ? 'bg-blue-50 text-blue-700 font-bold shadow-2xs'
                       : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                   }`}
                 >
                   <Home className={`w-5 h-5 shrink-0 ${state.currentScreen === 'home' ? 'text-blue-600' : 'text-slate-400'}`} />
-                  {!isSidebarCollapsed && <span>{t('nav.home', 'Home')}</span>}
-                </button>
-
-                <button
-                  id="nav-lead-tasks"
-                  onClick={() => handleNavClick('tasks')}
-                  title={t('nav.tasks_hub', 'All Tasks Hub')}
-                  className={`w-full min-h-[48px] flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'gap-3 px-3.5'} py-2.5 rounded-xl text-xs font-semibold transition ${
-                    state.currentScreen === 'tasks'
-                      ? 'bg-blue-50 text-blue-700 font-bold shadow-2xs'
-                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                  }`}
-                >
-                  <Layers className={`w-5 h-5 shrink-0 ${state.currentScreen === 'tasks' ? 'text-blue-600' : 'text-slate-400'}`} />
-                  {!isSidebarCollapsed && <span>{t('nav.tasks_hub', 'All Tasks Hub')}</span>}
+                  {!isSidebarCollapsed && <span>{t('nav.home', 'Tổng quan ca trực')}</span>}
                 </button>
 
                 <button
                   id="nav-lead-instructions"
                   onClick={() => handleNavClick('facilitator')}
-                  title={t('nav.lead_workspace', 'Lead Workspace')}
-                  className={`w-full min-h-[48px] flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'justify-between px-3.5'} py-2.5 rounded-xl text-xs font-semibold transition ${
+                  title={t('nav.lead_workspace', 'Quy trình & Hướng dẫn SOP')}
+                  className={`w-full min-h-[50px] flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'justify-between px-3.5'} py-3 rounded-xl text-sm font-semibold transition ${
                     state.currentScreen === 'facilitator' ||
                     state.currentScreen === 'review_publish' ||
                     state.currentScreen === 'published'
@@ -166,7 +157,7 @@ export const AppWindowLayout: React.FC<{ children: React.ReactNode }> = ({ child
                       : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                   }`}
                 >
-                  <div className={`flex items-center ${isSidebarCollapsed ? '' : 'gap-3'}`}>
+                  <div className={`flex items-center ${isSidebarCollapsed ? '' : 'gap-3.5'}`}>
                     <FileText
                       className={`w-5 h-5 shrink-0 ${
                         state.currentScreen === 'facilitator' ||
@@ -176,10 +167,10 @@ export const AppWindowLayout: React.FC<{ children: React.ReactNode }> = ({ child
                           : 'text-slate-400'
                       }`}
                     />
-                    {!isSidebarCollapsed && <span>{t('nav.lead_workspace', 'Lead Workspace')}</span>}
+                    {!isSidebarCollapsed && <span>{t('nav.lead_workspace', 'Quy trình & SOP')}</span>}
                   </div>
                   {!isSidebarCollapsed && state.lifecycleStage === 'worker_sent' && (
-                    <span className="w-4 h-4 rounded-full bg-blue-600 text-white font-bold text-[10px] flex items-center justify-center">
+                    <span className="w-5 h-5 rounded-full bg-rose-600 text-white font-bold text-xs flex items-center justify-center animate-pulse">
                       1
                     </span>
                   )}
@@ -188,30 +179,30 @@ export const AppWindowLayout: React.FC<{ children: React.ReactNode }> = ({ child
                 <button
                   id="nav-lead-accountability"
                   onClick={() => handleNavClick('accountability')}
-                  title={t('nav.justice', 'Workplace Justice')}
-                  className={`w-full min-h-[48px] flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'gap-3 px-3.5'} py-2.5 rounded-xl text-xs font-semibold transition ${
+                  title={t('nav.justice', 'Hồ sơ xác minh & Công bằng')}
+                  className={`w-full min-h-[50px] flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'gap-3.5 px-3.5'} py-3 rounded-xl text-sm font-semibold transition ${
                     state.currentScreen === 'accountability'
                       ? 'bg-blue-50 text-blue-700 font-bold shadow-2xs'
                       : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                   }`}
                 >
                   <Scale className={`w-5 h-5 shrink-0 ${state.currentScreen === 'accountability' ? 'text-blue-600' : 'text-slate-400'}`} />
-                  {!isSidebarCollapsed && <span>{t('nav.justice', 'Workplace Justice')}</span>}
+                  {!isSidebarCollapsed && <span>{t('nav.justice', 'Hồ sơ xác minh')}</span>}
                 </button>
 
                 <button
                   id="nav-lead-messages"
                   onClick={() => handleNavClick('messages')}
-                  title={t('nav.messages', 'Messages')}
-                  className={`w-full min-h-[48px] flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'justify-between px-3.5'} py-2.5 rounded-xl text-xs font-semibold transition ${
+                  title={t('nav.messages', 'Luồng trao đổi ca trực')}
+                  className={`w-full min-h-[50px] flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'justify-between px-3.5'} py-3 rounded-xl text-sm font-semibold transition ${
                     state.currentScreen === 'messages'
                       ? 'bg-blue-50 text-blue-700 font-bold shadow-2xs'
                       : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                   }`}
                 >
-                  <div className={`flex items-center ${isSidebarCollapsed ? '' : 'gap-3'}`}>
+                  <div className={`flex items-center ${isSidebarCollapsed ? '' : 'gap-3.5'}`}>
                     <Mail className={`w-5 h-5 shrink-0 ${state.currentScreen === 'messages' ? 'text-blue-600' : 'text-slate-400'}`} />
-                    {!isSidebarCollapsed && <span>{t('nav.messages', 'Messages')}</span>}
+                    {!isSidebarCollapsed && <span>{t('nav.messages', 'Trao đổi ca trực')}</span>}
                   </div>
                   {state.lifecycleStage === 'worker_sent' && (
                     <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse" />
@@ -221,152 +212,104 @@ export const AppWindowLayout: React.FC<{ children: React.ReactNode }> = ({ child
                 <button
                   id="nav-lead-team"
                   onClick={() => handleNavClick('team')}
-                  title={t('nav.team', 'Team')}
-                  className={`w-full min-h-[48px] flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'gap-3 px-3.5'} py-2.5 rounded-xl text-xs font-semibold transition ${
-                    state.currentScreen === 'team'
+                  title={t('nav.team', 'Đội ngũ & Tài liệu')}
+                  className={`w-full min-h-[50px] flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'gap-3.5 px-3.5'} py-3 rounded-xl text-sm font-semibold transition ${
+                    state.currentScreen === 'team' || state.currentScreen === 'resources'
                       ? 'bg-blue-50 text-blue-700 font-bold shadow-2xs'
                       : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                   }`}
                 >
-                  <Users className={`w-5 h-5 shrink-0 ${state.currentScreen === 'team' ? 'text-blue-600' : 'text-slate-400'}`} />
-                  {!isSidebarCollapsed && <span>{t('nav.team', 'Team')}</span>}
-                </button>
-
-                <button
-                  id="nav-lead-resources"
-                  onClick={() => handleNavClick('resources')}
-                  title={t('nav.resources', 'Resources')}
-                  className={`w-full min-h-[48px] flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'gap-3 px-3.5'} py-2.5 rounded-xl text-xs font-semibold transition ${
-                    state.currentScreen === 'resources'
-                      ? 'bg-blue-50 text-blue-700 font-bold shadow-2xs'
-                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                  }`}
-                >
-                  <FolderKanban className={`w-5 h-5 shrink-0 ${state.currentScreen === 'resources' ? 'text-blue-600' : 'text-slate-400'}`} />
-                  {!isSidebarCollapsed && <span>{t('nav.resources', 'Resources')}</span>}
+                  <Users className={`w-5 h-5 shrink-0 ${state.currentScreen === 'team' || state.currentScreen === 'resources' ? 'text-blue-600' : 'text-slate-400'}`} />
+                  {!isSidebarCollapsed && <span>{t('nav.team', 'Đội ngũ & Tài liệu')}</span>}
                 </button>
 
                 <button
                   id="nav-lead-settings"
                   onClick={() => handleNavClick('settings')}
-                  title={t('nav.settings', 'Settings')}
-                  className={`w-full min-h-[48px] flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'gap-3 px-3.5'} py-2.5 rounded-xl text-xs font-semibold transition ${
+                  title={t('nav.settings', 'Cài đặt hệ thống')}
+                  className={`w-full min-h-[50px] flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'gap-3.5 px-3.5'} py-3 rounded-xl text-sm font-semibold transition ${
                     state.currentScreen === 'settings'
                       ? 'bg-blue-50 text-blue-700 font-bold shadow-2xs'
                       : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                   }`}
                 >
                   <Settings className={`w-5 h-5 shrink-0 ${state.currentScreen === 'settings' ? 'text-blue-600' : 'text-slate-400'}`} />
-                  {!isSidebarCollapsed && <span>{t('nav.settings', 'Settings')}</span>}
+                  {!isSidebarCollapsed && <span>{t('nav.settings', 'Cài đặt hệ thống')}</span>}
                 </button>
               </>
             ) : (
-              /* Worker Navigation:
-                 Home, My Tasks, Instructions, Ask or Suggest, Accountability, Messages, Learning, Settings */
+              /* Worker Navigation (Minh - 5 Core Hubs):
+                 1. Nhiệm vụ & Trạm làm việc (Workstation Hub)
+                 2. Hồ sơ xác minh & Công bằng (Verification Trail)
+                 3. Luồng trao đổi ca trực (Contextual Messages)
+                 4. Đào tạo & Thủ ngữ VSL (Visual Learning)
+                 5. Trợ năng & Cài đặt trạm (Accessibility Settings) */
               <>
                 <button
-                  id="nav-worker-home"
+                  id="nav-worker-workstation"
                   onClick={() => handleNavClick('home')}
-                  title={t('nav.home', 'Home')}
-                  className={`w-full min-h-[48px] flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'gap-3 px-3.5'} py-2.5 rounded-xl text-xs font-medium transition ${
-                    state.currentScreen === 'home'
-                      ? 'bg-blue-50 text-blue-700 font-bold shadow-2xs'
-                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                  }`}
-                >
-                  <Home className={`w-5 h-5 shrink-0 ${state.currentScreen === 'home' ? 'text-blue-600' : 'text-slate-400'}`} />
-                  {!isSidebarCollapsed && <span>{t('nav.home', 'Home')}</span>}
-                </button>
-
-                <button
-                  id="nav-worker-my-tasks"
-                  onClick={() => handleNavClick('tasks')}
-                  title={t('nav.tasks_hub', 'My Tasks')}
-                  className={`w-full min-h-[48px] flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'justify-between px-3.5'} py-2.5 rounded-xl text-xs font-medium transition ${
-                    state.currentScreen === 'tasks'
-                      ? 'bg-blue-50 text-blue-700 font-bold shadow-2xs'
-                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                  }`}
-                >
-                  <div className={`flex items-center ${isSidebarCollapsed ? '' : 'gap-3'}`}>
-                    <CheckSquare className={`w-5 h-5 shrink-0 ${state.currentScreen === 'tasks' ? 'text-blue-600' : 'text-slate-400'}`} />
-                    {!isSidebarCollapsed && <span>{t('nav.tasks_hub', 'My Tasks')}</span>}
-                  </div>
-                  {!isSidebarCollapsed && (
-                    <span className="text-[10px] font-bold px-1.5 py-0.2 rounded-full bg-slate-100 text-slate-600">
-                      4
-                    </span>
-                  )}
-                </button>
-
-                <button
-                  id="nav-worker-instructions"
-                  onClick={() => handleNavClick('worker_detail')}
-                  title={t('nav.worker_detail', 'Instructions')}
-                  className={`w-full min-h-[48px] flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'justify-between px-3.5'} py-2.5 rounded-xl text-xs font-medium transition ${
-                    state.currentScreen === 'worker_detail' || state.currentScreen === 'published'
-                      ? 'bg-blue-50 text-blue-700 font-bold shadow-2xs'
-                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
-                  }`}
-                >
-                  <div className={`flex items-center ${isSidebarCollapsed ? '' : 'gap-3'}`}>
-                    <FileText
-                      className={`w-5 h-5 shrink-0 ${
-                        state.currentScreen === 'worker_detail' || state.currentScreen === 'published'
-                          ? 'text-blue-600'
-                          : 'text-slate-400'
-                      }`}
-                    />
-                    {!isSidebarCollapsed && <span>{t('nav.worker_detail', 'Instructions')}</span>}
-                  </div>
-                  {state.lifecycleStage === 'facilitator_replied' && (
-                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-                  )}
-                </button>
-
-                <button
-                  id="nav-worker-ask-suggest"
-                  onClick={() => handleNavClick('ask_suggest')}
-                  title={t('nav.ask_suggest', 'Ask or Suggest')}
-                  className={`w-full min-h-[48px] flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'gap-3 px-3.5'} py-2.5 rounded-xl text-xs font-medium transition ${
+                  title={t('nav.home', 'Nhiệm vụ & Trạm làm việc')}
+                  className={`w-full min-h-[50px] flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'justify-between px-3.5'} py-3 rounded-xl text-sm font-semibold transition ${
+                    state.currentScreen === 'home' ||
+                    state.currentScreen === 'tasks' ||
+                    state.currentScreen === 'worker_detail' ||
                     state.currentScreen === 'ask_suggest'
                       ? 'bg-blue-50 text-blue-700 font-bold shadow-2xs'
                       : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                   }`}
                 >
-                  <MessageSquarePlus
-                    className={`w-5 h-5 shrink-0 ${state.currentScreen === 'ask_suggest' ? 'text-blue-600' : 'text-slate-400'}`}
-                  />
-                  {!isSidebarCollapsed && <span>{t('nav.ask_suggest', 'Ask or Suggest')}</span>}
+                  <div className={`flex items-center ${isSidebarCollapsed ? '' : 'gap-3.5'}`}>
+                    <CheckSquare
+                      className={`w-5 h-5 shrink-0 ${
+                        state.currentScreen === 'home' ||
+                        state.currentScreen === 'tasks' ||
+                        state.currentScreen === 'worker_detail' ||
+                        state.currentScreen === 'ask_suggest'
+                          ? 'text-blue-600'
+                          : 'text-slate-400'
+                      }`}
+                    />
+                    {!isSidebarCollapsed && <span>{t('nav.home', 'Nhiệm vụ & Trạm')}</span>}
+                  </div>
+                  {!isSidebarCollapsed && (
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-full bg-blue-100 text-blue-700">
+                      INS-1042
+                    </span>
+                  )}
                 </button>
 
                 <button
                   id="nav-worker-accountability"
                   onClick={() => handleNavClick('accountability')}
-                  title={t('nav.justice', 'Workplace Justice')}
-                  className={`w-full min-h-[48px] flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'gap-3 px-3.5'} py-2.5 rounded-xl text-xs font-medium transition ${
+                  title={t('nav.justice', 'Hồ sơ xác minh & Công bằng')}
+                  className={`w-full min-h-[50px] flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'justify-between px-3.5'} py-3 rounded-xl text-sm font-semibold transition ${
                     state.currentScreen === 'accountability'
                       ? 'bg-blue-50 text-blue-700 font-bold shadow-2xs'
                       : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                   }`}
                 >
-                  <Scale className={`w-5 h-5 shrink-0 ${state.currentScreen === 'accountability' ? 'text-blue-600' : 'text-slate-400'}`} />
-                  {!isSidebarCollapsed && <span>{t('nav.justice', 'Workplace Justice')}</span>}
+                  <div className={`flex items-center ${isSidebarCollapsed ? '' : 'gap-3.5'}`}>
+                    <Scale className={`w-5 h-5 shrink-0 ${state.currentScreen === 'accountability' ? 'text-blue-600' : 'text-slate-400'}`} />
+                    {!isSidebarCollapsed && <span>{t('nav.justice', 'Hồ sơ xác minh')}</span>}
+                  </div>
+                  {!isSidebarCollapsed && state.isDestinationUpdated && (
+                    <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" title="Đã có bằng chứng xác nhận đổi Khay B" />
+                  )}
                 </button>
 
                 <button
                   id="nav-worker-messages"
                   onClick={() => handleNavClick('messages')}
-                  title={t('nav.messages', 'Messages')}
-                  className={`w-full min-h-[48px] flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'justify-between px-3.5'} py-2.5 rounded-xl text-xs font-medium transition ${
+                  title={t('nav.messages', 'Luồng trao đổi ca trực')}
+                  className={`w-full min-h-[50px] flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'justify-between px-3.5'} py-3 rounded-xl text-sm font-semibold transition ${
                     state.currentScreen === 'messages'
                       ? 'bg-blue-50 text-blue-700 font-bold shadow-2xs'
                       : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                   }`}
                 >
-                  <div className={`flex items-center ${isSidebarCollapsed ? '' : 'gap-3'}`}>
+                  <div className={`flex items-center ${isSidebarCollapsed ? '' : 'gap-3.5'}`}>
                     <Mail className={`w-5 h-5 shrink-0 ${state.currentScreen === 'messages' ? 'text-blue-600' : 'text-slate-400'}`} />
-                    {!isSidebarCollapsed && <span>{t('nav.messages', 'Messages')}</span>}
+                    {!isSidebarCollapsed && <span>{t('nav.messages', 'Trao đổi ca trực')}</span>}
                   </div>
                   {state.lifecycleStage === 'facilitator_replied' && (
                     <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
@@ -376,29 +319,29 @@ export const AppWindowLayout: React.FC<{ children: React.ReactNode }> = ({ child
                 <button
                   id="nav-worker-learning"
                   onClick={() => handleNavClick('learning')}
-                  title={t('nav.learning', 'Safety & Learning')}
-                  className={`w-full min-h-[48px] flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'gap-3 px-3.5'} py-2.5 rounded-xl text-xs font-medium transition ${
+                  title={t('nav.learning', 'Đào tạo & Thủ ngữ VSL')}
+                  className={`w-full min-h-[50px] flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'gap-3.5 px-3.5'} py-3 rounded-xl text-sm font-semibold transition ${
                     state.currentScreen === 'learning'
                       ? 'bg-blue-50 text-blue-700 font-bold shadow-2xs'
                       : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                   }`}
                 >
                   <GraduationCap className={`w-5 h-5 shrink-0 ${state.currentScreen === 'learning' ? 'text-blue-600' : 'text-slate-400'}`} />
-                  {!isSidebarCollapsed && <span>{t('nav.learning', 'Safety & Learning')}</span>}
+                  {!isSidebarCollapsed && <span>{t('nav.learning', 'Đào tạo & VSL')}</span>}
                 </button>
 
                 <button
                   id="nav-worker-settings"
                   onClick={() => handleNavClick('settings')}
-                  title={t('nav.settings', 'Settings')}
-                  className={`w-full min-h-[48px] flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'gap-3 px-3.5'} py-2.5 rounded-xl text-xs font-medium transition ${
+                  title={t('nav.settings', 'Trợ năng & Cài đặt trạm')}
+                  className={`w-full min-h-[50px] flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'gap-3.5 px-3.5'} py-3 rounded-xl text-sm font-semibold transition ${
                     state.currentScreen === 'settings'
                       ? 'bg-blue-50 text-blue-700 font-bold shadow-2xs'
                       : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
                   }`}
                 >
-                  <Settings className={`w-5 h-5 shrink-0 ${state.currentScreen === 'settings' ? 'text-blue-600' : 'text-slate-400'}`} />
-                  {!isSidebarCollapsed && <span>{t('nav.settings', 'Settings')}</span>}
+                  <Sliders className={`w-5 h-5 shrink-0 ${state.currentScreen === 'settings' ? 'text-blue-600' : 'text-slate-400'}`} />
+                  {!isSidebarCollapsed && <span>{t('nav.settings', 'Trợ năng trạm')}</span>}
                 </button>
               </>
             )}
@@ -443,7 +386,7 @@ export const AppWindowLayout: React.FC<{ children: React.ReactNode }> = ({ child
               className="hidden md:flex p-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition border border-slate-200"
               title={isSidebarCollapsed ? 'Mở rộng thanh bên (Focus Mode Tắt)' : 'Thu gọn thanh bên (Bật Focus Mode cho trạm làm việc)'}
             >
-              {isSidebarCollapsed ? <PanelLeft className="w-4 h-4 text-blue-600" /> : <PanelLeftClose className="w-4 h-4" />}
+              {isSidebarCollapsed ? <PanelLeft className="w-5 h-5 text-blue-600" /> : <PanelLeftClose className="w-5 h-5" />}
             </button>
 
             <div className="relative flex-1 flex items-center">
@@ -452,10 +395,10 @@ export const AppWindowLayout: React.FC<{ children: React.ReactNode }> = ({ child
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search instructions, standard work, or terms..."
-                className="w-full pl-9 pr-14 py-2 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200/90 rounded-xl text-xs text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 transition"
+                placeholder={t('header.search_placeholder', 'Tìm kiếm quy trình SOP, linh kiện, trạm...')}
+                className="w-full pl-9 pr-14 py-2.5 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200/90 rounded-xl text-sm text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 transition"
               />
-              <span className="hidden sm:inline-block absolute right-3 px-1.5 py-0.5 text-[10px] font-semibold text-slate-400 bg-white border border-slate-200 rounded-md shadow-2xs pointer-events-none">
+              <span className="hidden sm:inline-block absolute right-3 px-1.5 py-0.5 text-xs font-semibold text-slate-400 bg-white border border-slate-200 rounded-md shadow-2xs pointer-events-none">
                 ⌘ K
               </span>
             </div>

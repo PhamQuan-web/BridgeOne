@@ -239,8 +239,8 @@ export const TasksHubScreen: React.FC = () => {
                     {task.line}
                   </span>
                   {task.isGolden && (
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300">
-                      ★ Golden Flow Task
+                    <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-900 border border-blue-300">
+                      ★ Trạm trọng điểm ca trực
                     </span>
                   )}
                 </div>

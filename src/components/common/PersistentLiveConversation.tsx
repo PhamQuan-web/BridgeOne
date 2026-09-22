@@ -53,6 +53,7 @@ export const PersistentLiveConversation: React.FC = () => {
   const [speechActive, setSpeechActive] = useState<boolean>(false);
   const [interimText, setInterimText] = useState<string>('');
   const [isSignSheetOpen, setIsSignSheetOpen] = useState<boolean>(false);
+  const [captionScale, setCaptionScale] = useState<'normal' | 'large' | 'huge'>('large');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const recognitionRef = useRef<any>(null);
@@ -368,6 +369,20 @@ export const PersistentLiveConversation: React.FC = () => {
 
             {/* Right: AI Catch-up, Quick Visual Sign, Mic STT & Expand/Collapse */}
             <div className="flex items-center gap-1.5 shrink-0">
+              {/* Caption Scale Toggle (Phóng to cỡ chữ phụ đề cho người khiếm thính) */}
+              <button
+                type="button"
+                onClick={() => {
+                  setCaptionScale((prev) => (prev === 'normal' ? 'large' : prev === 'large' ? 'huge' : 'normal'));
+                }}
+                className="px-2 py-1 rounded-lg text-xs font-black bg-slate-100 hover:bg-slate-200 text-slate-700 transition flex items-center gap-1 border border-slate-200"
+                title={`Cỡ chữ phụ đề: ${captionScale === 'normal' ? 'Chuẩn' : captionScale === 'large' ? 'Lớn' : 'Rất lớn'} (Bấm để đổi)`}
+              >
+                <span className={captionScale === 'huge' ? 'text-blue-600 font-black text-sm' : captionScale === 'large' ? 'text-blue-600 font-bold' : ''}>
+                  Aa{captionScale === 'huge' ? '++' : captionScale === 'large' ? '+' : ''}
+                </span>
+              </button>
+
               {/* Deaf Friendly Quick Sign/Icon Sheet Button */}
               <button
                 type="button"
@@ -572,7 +587,9 @@ export const PersistentLiveConversation: React.FC = () => {
                           </button>
                         </div>
                       </div>
-                      <p className="text-slate-800 font-medium leading-relaxed mt-0.5">
+                      <p className={`text-slate-800 font-medium leading-relaxed mt-1 ${
+                        captionScale === 'huge' ? 'text-base font-bold' : captionScale === 'large' ? 'text-sm font-semibold' : 'text-xs'
+                      }`}>
                         {item.text}
                       </p>
                     </div>
@@ -583,21 +600,21 @@ export const PersistentLiveConversation: React.FC = () => {
 
               {/* DEAF ACCESSIBILITY: Fast Communication Action Sheet */}
               {isSignSheetOpen && (
-                <div className="p-2.5 bg-blue-50/90 rounded-xl border border-blue-200 text-xs space-y-2 animate-in fade-in duration-150">
+                <div className="p-3 bg-blue-50/90 rounded-xl border border-blue-200 text-sm space-y-2.5 animate-in fade-in duration-150">
                   <div className="flex items-center justify-between">
-                    <span className="font-extrabold text-[11px] text-blue-900 flex items-center gap-1.5">
-                      <Eye className="w-3.5 h-3.5 text-blue-600" />
+                    <span className="font-extrabold text-xs text-blue-900 flex items-center gap-1.5">
+                      <Eye className="w-4 h-4 text-blue-600" />
                       Giao tiếp không lời (Người khiếm thính ↔ Quản lý)
                     </span>
                     <button
                       type="button"
                       onClick={() => setIsSignSheetOpen(false)}
-                      className="text-slate-400 hover:text-slate-700"
+                      className="text-slate-400 hover:text-slate-700 p-1"
                     >
-                      <X className="w-3.5 h-3.5" />
+                      <X className="w-4 h-4" />
                     </button>
                   </div>
-                  <div className="grid grid-cols-2 gap-1.5">
+                  <div className="grid grid-cols-2 gap-2">
                     <button
                       type="button"
                       onClick={() => {
@@ -606,9 +623,9 @@ export const PersistentLiveConversation: React.FC = () => {
                         handleSpeakText('Minh đã hoàn tất bước này an toàn!');
                         setIsSignSheetOpen(false);
                       }}
-                      className="p-2 bg-white hover:bg-emerald-50 hover:text-emerald-800 border border-slate-200 rounded-lg font-semibold text-left transition flex items-center gap-2"
+                      className="p-2.5 bg-white hover:bg-emerald-50 hover:text-emerald-800 border border-slate-200 rounded-xl font-bold text-xs sm:text-sm text-left transition flex items-center gap-2 shadow-2xs"
                     >
-                      <span className="text-base">👍</span>
+                      <span className="text-lg">👍</span>
                       <span className="truncate">Đã xong / OK</span>
                     </button>
                     <button
@@ -619,9 +636,9 @@ export const PersistentLiveConversation: React.FC = () => {
                         handleSpeakText('Cần quản lý hỗ trợ tại vị trí!');
                         setIsSignSheetOpen(false);
                       }}
-                      className="p-2 bg-white hover:bg-rose-50 hover:text-rose-800 border border-slate-200 rounded-lg font-semibold text-left transition flex items-center gap-2"
+                      className="p-2.5 bg-white hover:bg-rose-50 hover:text-rose-800 border border-slate-200 rounded-xl font-bold text-xs sm:text-sm text-left transition flex items-center gap-2 shadow-2xs"
                     >
-                      <span className="text-base">🙋</span>
+                      <span className="text-lg">🙋</span>
                       <span className="truncate">Cần hỗ trợ gấp</span>
                     </button>
                     <button
@@ -632,9 +649,9 @@ export const PersistentLiveConversation: React.FC = () => {
                         handleSpeakText('Khay linh kiện đã đầy, xin chỉ đạo vị trí tiếp theo!');
                         setIsSignSheetOpen(false);
                       }}
-                      className="p-2 bg-white hover:bg-blue-50 hover:text-blue-800 border border-slate-200 rounded-lg font-semibold text-left transition flex items-center gap-2"
+                      className="p-2.5 bg-white hover:bg-blue-50 hover:text-blue-800 border border-slate-200 rounded-xl font-bold text-xs sm:text-sm text-left transition flex items-center gap-2 shadow-2xs"
                     >
-                      <span className="text-base">📦</span>
+                      <span className="text-lg">📦</span>
                       <span className="truncate">Đầy khay chứa</span>
                     </button>
                     <button
@@ -645,24 +662,24 @@ export const PersistentLiveConversation: React.FC = () => {
                         handleSpeakText('Xin nhắc lại thao tác này rõ hơn!');
                         setIsSignSheetOpen(false);
                       }}
-                      className="p-2 bg-white hover:bg-amber-50 hover:text-amber-800 border border-slate-200 rounded-lg font-semibold text-left transition flex items-center gap-2"
+                      className="p-2.5 bg-white hover:bg-amber-50 hover:text-amber-800 border border-slate-200 rounded-xl font-bold text-xs sm:text-sm text-left transition flex items-center gap-2 shadow-2xs"
                     >
-                      <span className="text-base">🔄</span>
+                      <span className="text-lg">🔄</span>
                       <span className="truncate">Xin nhắc lại</span>
                     </button>
                   </div>
                 </div>
               )}
 
-              {/* Quick Template Chips */}
-              <div className="flex items-center gap-1.5 overflow-x-auto pb-1 text-[11px] select-none">
+              {/* Quick Template Chips - Large & High Contrast */}
+              <div className="flex items-center gap-2 overflow-x-auto pb-1 select-none">
                 <button
                   type="button"
                   onClick={() => {
                     const sender = state.activePersona === 'facilitator' ? 'An' : 'Minh';
                     sendLiveMessage('Minh xác nhận: Đã hoàn tất bước này an toàn!', sender);
                   }}
-                  className="px-2 py-1 rounded-lg bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-700 font-semibold whitespace-nowrap transition"
+                  className="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-emerald-50 hover:text-emerald-800 text-slate-800 text-xs sm:text-sm font-bold whitespace-nowrap transition border border-slate-200 shadow-2xs"
                 >
                   👍 {t('live.chip_completed', 'Đã hoàn tất')}
                 </button>
@@ -672,7 +689,7 @@ export const PersistentLiveConversation: React.FC = () => {
                     const sender = state.activePersona === 'facilitator' ? 'An' : 'Minh';
                     sendLiveMessage('Cần quản lý qua hỗ trợ tại trạm!', sender);
                   }}
-                  className="px-2 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-800 font-semibold whitespace-nowrap transition border border-amber-200"
+                  className="px-3.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs sm:text-sm font-bold whitespace-nowrap transition border-2 border-amber-300 shadow-2xs"
                 >
                   ⚠️ {t('live.chip_help', 'Cần hỗ trợ')}
                 </button>
@@ -682,14 +699,14 @@ export const PersistentLiveConversation: React.FC = () => {
                     const sender = state.activePersona === 'facilitator' ? 'An' : 'Minh';
                     sendLiveMessage('Vật tư đã đầy, xin lệnh chuyển tiếp!', sender);
                   }}
-                  className="px-2 py-1 rounded-lg bg-slate-100 hover:bg-blue-50 hover:text-blue-700 text-slate-700 font-semibold whitespace-nowrap transition"
+                  className="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-blue-50 hover:text-blue-800 text-slate-800 text-xs sm:text-sm font-bold whitespace-nowrap transition border border-slate-200 shadow-2xs"
                 >
                   📦 {t('live.chip_material', 'Đầy vật tư')}
                 </button>
               </div>
 
-              {/* Input Form with Audio & Text */}
-              <form onSubmit={handleSendMessage} className="flex items-center gap-2">
+              {/* Input Form with Audio & Text - Scaled up */}
+              <form onSubmit={handleSendMessage} className="flex items-center gap-2 pt-1">
                 <input
                   type="text"
                   value={inputText}
@@ -699,15 +716,15 @@ export const PersistentLiveConversation: React.FC = () => {
                       ? 'Nhập chỉ đạo hoặc nói qua mic...'
                       : 'Nhập tin nhắn (tự động phát loa TTS cho quản lý nghe)...'
                   }
-                  className="flex-1 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 transition"
+                  className="flex-1 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 transition"
                 />
                 <button
                   type="submit"
                   disabled={!inputText.trim()}
-                  className="px-3.5 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 transition shadow-xs shrink-0"
+                  className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-xl text-sm font-bold flex items-center gap-2 transition shadow-sm shrink-0"
                 >
                   <span>{t('live.send', 'Gửi')}</span>
-                  <Send className="w-3.5 h-3.5" />
+                  <Send className="w-4 h-4" />
                 </button>
               </form>
             </div>

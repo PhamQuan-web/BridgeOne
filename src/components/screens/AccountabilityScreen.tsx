@@ -58,7 +58,7 @@ export const AccountabilityScreen: React.FC = () => {
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-2"
             >
               <Zap className="w-3.5 h-3.5" />
-              <span>Inspect Golden Flow (INS-1042)</span>
+              <span>Xem trạm thao tác (INS-1042)</span>
             </button>
           </div>
         </div>

@@ -141,25 +141,25 @@ export const WorkerTaskDetailScreen: React.FC = () => {
       <div className="flex items-center justify-between">
         <button
           onClick={() => setScreen('home')}
-          className="flex items-center gap-2 text-xs font-bold text-slate-600 hover:text-slate-900 transition"
+          className="flex items-center gap-2 text-sm font-bold text-slate-700 hover:text-blue-600 transition px-3 py-1.5 rounded-xl hover:bg-slate-100"
         >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Back to my tasks</span>
+          <ArrowLeft className="w-5 h-5" />
+          <span>{t('worker_detail.back', '← Quay lại danh sách nhiệm vụ')}</span>
         </button>
 
         <div className="flex items-center gap-3">
-          <span className="text-xs font-semibold text-slate-500">Task 3 of 8</span>
-          <div className="flex items-center gap-1">
+          <span className="text-sm font-semibold text-slate-500">Nhiệm vụ 3 / 8</span>
+          <div className="flex items-center gap-1.5">
             <button
               onClick={() => setScreen('home')}
-              className="w-7 h-7 rounded-lg bg-white border border-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center shadow-2xs transition"
+              className="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center shadow-2xs transition"
               title="Previous task"
             >
               <ChevronLeft className="w-4 h-4" />
             </button>
             <button
               onClick={() => setScreen('ask_suggest')}
-              className="w-7 h-7 rounded-lg bg-white border border-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center shadow-2xs transition"
+              className="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center shadow-2xs transition"
               title="Next task"
             >
               <ChevronRight className="w-4 h-4" />
@@ -169,40 +169,40 @@ export const WorkerTaskDetailScreen: React.FC = () => {
       </div>
 
       {/* 2. Main Two-Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-7 items-start">
         {/* LEFT COLUMN (8 cols): Task Title, Steps, and Clarification / Updated Alerts */}
         <div className="lg:col-span-8 space-y-6">
           {/* Title Header Card */}
           <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-2">
               {isUpdatedState ? (
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
-                  <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                  <span>UPDATED</span>
+                <span className="px-3 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1.5 shadow-2xs">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                  <span>ĐÃ XÁC MINH (KHAY B)</span>
                 </span>
               ) : isClarificationState ? (
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-rose-100 text-rose-800 border border-rose-300 flex items-center gap-1 animate-pulse">
-                  <Flag className="w-3.5 h-3.5 text-rose-600" />
-                  <span>NEEDS CLARIFICATION</span>
+                <span className="px-3 py-1 rounded-full text-xs font-black bg-rose-100 text-rose-800 border border-rose-300 flex items-center gap-1.5 animate-pulse">
+                  <Flag className="w-4 h-4 text-rose-600" />
+                  <span>CẦN LÀM RÕ (CHỜ DUYỆT)</span>
                 </span>
               ) : (
-                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-blue-100 text-blue-800 border border-blue-300">
-                  IN PROGRESS
+                <span className="px-3 py-1 rounded-full text-xs font-black bg-blue-100 text-blue-800 border border-blue-300">
+                  ĐANG THỰC HIỆN
                 </span>
               )}
-              <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-slate-100 text-slate-700 border border-slate-200">
-                Assembly Line A
+              <span className="px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
+                Dây chuyền A
               </span>
-              <span className="text-xs text-slate-500 font-bold">INS-1042</span>
+              <span className="text-xs text-slate-500 font-extrabold">INS-1042</span>
             </div>
 
             <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
-                Pack finished assemblies
+              <h1 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">
+                Đóng gói cụm linh kiện hoàn tất (SOP)
               </h1>
               {/* Cursive quote */}
               <div className="flex items-center gap-1 transform rotate-[-2deg]">
-                <span className="font-handwriting text-blue-600 text-xl font-bold">
+                <span className="font-handwriting text-blue-600 text-2xl font-bold">
                   Questions make work better.
                 </span>
                 <div className="text-emerald-500 flex gap-0.5 ml-1">
@@ -213,43 +213,43 @@ export const WorkerTaskDetailScreen: React.FC = () => {
               </div>
             </div>
 
-            <p className="text-sm text-slate-600 font-medium">
-              Safely pack completed assemblies into designated tray for staging and next stage.
+            <p className="text-sm sm:text-base text-slate-600 font-medium">
+              Đóng gói an toàn các cụm linh kiện hoàn thiện vào đúng khay quy định để đưa sang kệ đệm tiếp theo.
             </p>
 
             {/* Meta tags & Action Buttons */}
-            <div className="flex flex-wrap items-center gap-2.5 pt-1 text-xs text-slate-600">
-              <span className="px-3 py-1 bg-white border border-slate-200 rounded-lg font-semibold text-slate-800 shadow-2xs">
-                Medium
+            <div className="flex flex-wrap items-center gap-2.5 pt-1 text-xs sm:text-sm text-slate-600">
+              <span className="px-3 py-1.5 bg-white border border-slate-200 rounded-xl font-bold text-slate-800 shadow-2xs">
+                Độ khó: Vừa phải
               </span>
-              <span className="px-3 py-1 bg-white border border-slate-200 rounded-lg font-medium text-slate-600 flex items-center gap-1.5 shadow-2xs">
-                <Clock className="w-3.5 h-3.5 text-slate-400" />
-                ~ 5 minutes
+              <span className="px-3 py-1.5 bg-white border border-slate-200 rounded-xl font-medium text-slate-600 flex items-center gap-1.5 shadow-2xs">
+                <Clock className="w-4 h-4 text-slate-400" />
+                ~ 5 phút
               </span>
-              <span className="px-3 py-1 bg-white border border-slate-200 rounded-lg font-medium text-slate-600 shadow-2xs">
-                Standard Work
+              <span className="px-3 py-1.5 bg-white border border-slate-200 rounded-xl font-medium text-slate-600 shadow-2xs">
+                Quy trình chuẩn
               </span>
 
               {/* TTS Read Aloud */}
               <button
                 id="btn-tts-read-aloud"
                 onClick={() => playTextToSpeech(fullInstructionText)}
-                className={`px-3 py-1 rounded-lg font-semibold text-xs transition flex items-center gap-1.5 shadow-2xs border ${
+                className={`px-3.5 py-1.5 rounded-xl font-bold text-xs sm:text-sm transition flex items-center gap-2 shadow-2xs border ${
                   state.ttsPlaying
                     ? 'bg-blue-600 text-white border-blue-600 animate-pulse'
                     : 'bg-white hover:bg-slate-50 text-blue-700 border-blue-200'
                 }`}
-                title="Read aloud instructions for auditory reinforcement"
+                title="Đọc to hướng dẫn từng bước ra loa (TTS)"
               >
                 {state.ttsPlaying ? (
                   <>
-                    <VolumeX className="w-3.5 h-3.5" />
-                    <span>Stop audio</span>
+                    <VolumeX className="w-4 h-4" />
+                    <span>Dừng giọng đọc</span>
                   </>
                 ) : (
                   <>
-                    <Volume2 className="w-3.5 h-3.5 text-blue-600" />
-                    <span>Read aloud</span>
+                    <Volume2 className="w-4 h-4 text-blue-600" />
+                    <span>Đọc to hướng dẫn (TTS)</span>
                   </>
                 )}
               </button>
@@ -259,10 +259,10 @@ export const WorkerTaskDetailScreen: React.FC = () => {
                 <button
                   id="btn-ask-suggest-header"
                   onClick={() => setIsAskModalOpen(true)}
-                  className="px-3 py-1 rounded-lg font-bold text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-300 transition flex items-center gap-1.5 shadow-2xs"
+                  className="px-3.5 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-300 transition flex items-center gap-1.5 shadow-2xs"
                 >
-                  <MessageSquarePlus className="w-3.5 h-3.5 text-blue-600" />
-                  <span>Ask or suggest</span>
+                  <MessageSquarePlus className="w-4 h-4 text-blue-600" />
+                  <span>Báo cờ đỏ / Hỏi quản lý</span>
                 </button>
               )}
             </div>

@@ -5,21 +5,44 @@
     --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   }
 
+  html {
+    /* Scale whole UI ~12-15% naturally without browser zoom */
+    font-size: 17.5px;
+    scroll-behavior: smooth;
+  }
+
+  @media (max-width: 640px) {
+    html {
+      font-size: 16px;
+    }
+  }
+
   body {
     font-family: var(--font-sans);
-    background-color: #f1f5f9;
+    background-color: #f8fafc;
     color: #0f172a;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
   }
 
   /* Accessible focus indicators */
   :focus-visible {
-    outline: 2px solid #2563eb;
-    outline-offset: 2px;
+    outline: 3px solid #2563eb;
+    outline-offset: 3px;
   }
 }
 
 .font-handwriting {
   font-family: 'Caveat', cursive;
+}
+
+/* Custom pulse animations for workstation visual cues */
+@keyframes soft-pulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.85; transform: scale(1.02); }
+}
+
+.animate-soft-pulse {
+  animation: soft-pulse 2.5s ease-in-out infinite;
 }

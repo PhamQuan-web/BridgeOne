@@ -8,18 +8,18 @@ export const translations: Record<SupportedLanguage, Record<string, string>> = {
     'brand.motto': 'Cùng một đội ngũ. Tương lai tươi sáng hơn.',
     'universal.workplace': 'Ngành nghề phổ quát',
 
-    // Nav Menu (Left Sidebar)
-    'nav.home': 'Trang chủ',
-    'nav.tasks_hub': 'Trung tâm công việc',
-    'nav.lead_workspace': 'Không gian Quản lý',
-    'nav.worker_detail': 'Chi tiết việc của tôi',
-    'nav.ask_suggest': 'Hỏi & Đề xuất',
-    'nav.justice': 'Trách nhiệm & Công bằng',
-    'nav.messages': 'Hộp thư trao đổi',
+    // Nav Menu (Left Sidebar - 5 Core Hubs)
+    'nav.home': 'Nhiệm vụ & Trạm làm việc',
+    'nav.tasks_hub': 'Danh sách nhiệm vụ ca',
+    'nav.lead_workspace': 'Quy trình & Hướng dẫn SOP',
+    'nav.worker_detail': 'Trạm thao tác & SOP',
+    'nav.ask_suggest': 'Làm rõ & Báo vướng mắc',
+    'nav.justice': 'Hồ sơ xác minh & Công bằng',
+    'nav.messages': 'Luồng trao đổi ca trực',
     'nav.learning': 'Đào tạo & Thủ ngữ VSL',
     'nav.team': 'Đội ngũ trực ca',
     'nav.resources': 'Kho tài liệu & SOP',
-    'nav.settings': 'Cài đặt hệ thống',
+    'nav.settings': 'Trợ năng & Cài đặt trạm',
 
     // Roles & Personas
     'role.lead': 'Quản lý',
@@ -149,18 +149,18 @@ export const translations: Record<SupportedLanguage, Record<string, string>> = {
     'brand.motto': 'Same team. Brighter tomorrow.',
     'universal.workplace': 'Universal Workplace',
 
-    // Nav Menu (Left Sidebar)
-    'nav.home': 'Home',
-    'nav.tasks_hub': 'All Tasks Hub',
-    'nav.lead_workspace': 'Lead Workspace',
-    'nav.worker_detail': 'My Task Details',
-    'nav.ask_suggest': 'Ask & Suggest',
-    'nav.justice': 'Workplace Justice',
-    'nav.messages': 'Messages',
+    // Nav Menu (Left Sidebar - 5 Core Hubs)
+    'nav.home': 'Tasks & Workstation',
+    'nav.tasks_hub': 'Shift Tasks Hub',
+    'nav.lead_workspace': 'SOP Management & Lead',
+    'nav.worker_detail': 'Workstation & SOP',
+    'nav.ask_suggest': 'Clarify & Safety Flag',
+    'nav.justice': 'Verification & Justice Audit',
+    'nav.messages': 'Shift Context Messages',
     'nav.learning': 'VSL Sign Training',
-    'nav.team': 'Shift Team',
-    'nav.resources': 'Resources & SOP',
-    'nav.settings': 'Settings',
+    'nav.team': 'Shift Team & Resources',
+    'nav.resources': 'Resources & SOP Library',
+    'nav.settings': 'Accessibility & Settings',
 
     // Roles & Personas
     'role.lead': 'Lead',
