@@ -204,6 +204,22 @@ const INITIAL_STATE: HandoffState = {
       speechText: 'Xin nhắc lại thao tác này rõ hơn!',
       isDefault: true,
     },
+    {
+      id: 'qo-5',
+      icon: '⚙️',
+      label: 'Lỗi linh kiện',
+      messageText: 'Phôi linh kiện có dấu hiệu bị trầy xước hoặc lỗi cơ khí, xin phép tạm giữ!',
+      speechText: 'Phôi linh kiện có dấu hiệu bị trầy xước hoặc lỗi cơ khí, xin phép tạm giữ!',
+      isDefault: true,
+    },
+    {
+      id: 'qo-6',
+      icon: '🚻',
+      label: 'Rời trạm 5p',
+      messageText: 'Minh xin phép rời trạm thao tác trong 5 phút!',
+      speechText: 'Minh xin phép rời trạm thao tác trong năm phút!',
+      isDefault: true,
+    },
   ],
   liveTranscriptLog: [
     {
@@ -234,6 +250,8 @@ const INITIAL_STATE: HandoffState = {
   isLiveMicActive: false,
 
   isDemoDrawerOpen: false,
+  isSafetyAlertActive: false,
+  safetyAlertDetails: null,
 };
 
 interface HandoffContextType {
@@ -262,6 +280,8 @@ interface HandoffContextType {
   playTextToSpeech: (text: string) => void;
   addCustomQuickOption: (option: { icon: string; label: string; messageText: string; speechText?: string }) => void;
   removeCustomQuickOption: (id: string) => void;
+  triggerSafetyAlert: (direction?: 'RIGHT' | 'LEFT' | 'BEHIND', hazardType?: 'trolley' | 'forklift') => void;
+  dismissSafetyAlert: () => void;
   closeWorkerQuestion: () => void;
   reopenDiscussion: () => void;
   toggleFacilitatorConfirmation: (field: 'details' | 'accessible') => void;
@@ -581,6 +601,37 @@ export const HandoffProvider: React.FC<{ children: ReactNode }> = ({ children })
     setState((prev) => ({
       ...prev,
       customQuickOptions: (prev.customQuickOptions || []).filter((opt) => opt.id !== id),
+    }));
+  };
+
+  const triggerSafetyAlert = (
+    direction: 'RIGHT' | 'LEFT' | 'BEHIND' = 'RIGHT',
+    hazardType: 'trolley' | 'forklift' = 'trolley'
+  ) => {
+    setState((prev) => ({
+      ...prev,
+      isSafetyAlertActive: true,
+      safetyAlertDetails: {
+        hazardType,
+        direction,
+        timeToImpact: 3,
+        location: 'Khúc cua ngã tư Chuyền A (Blind Corner Camera 02)',
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' }),
+      },
+    }));
+
+    try {
+      if (typeof navigator !== 'undefined' && navigator.vibrate) {
+        navigator.vibrate([300, 100, 300, 100, 500]);
+      }
+    } catch {}
+  };
+
+  const dismissSafetyAlert = () => {
+    setState((prev) => ({
+      ...prev,
+      isSafetyAlertActive: false,
+      safetyAlertDetails: null,
     }));
   };
 
@@ -1110,6 +1161,8 @@ export const HandoffProvider: React.FC<{ children: ReactNode }> = ({ children })
         playTextToSpeech,
         addCustomQuickOption,
         removeCustomQuickOption,
+        triggerSafetyAlert,
+        dismissSafetyAlert,
         closeWorkerQuestion,
         reopenDiscussion,
         toggleFacilitatorConfirmation,

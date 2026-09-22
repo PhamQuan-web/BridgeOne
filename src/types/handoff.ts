@@ -170,5 +170,15 @@ export interface HandoffState {
 
   // Demo assistant drawer
   isDemoDrawerOpen: boolean;
+
+  // Module 2: Accessible Blind-Corner Safety Alert
+  isSafetyAlertActive: boolean;
+  safetyAlertDetails: {
+    hazardType: 'trolley' | 'forklift' | 'person';
+    direction: 'RIGHT' | 'LEFT' | 'BEHIND';
+    timeToImpact: number;
+    location: string;
+    timestamp: string;
+  } | null;
 }
 

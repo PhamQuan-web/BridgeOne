@@ -2,6 +2,7 @@ import React from 'react';
 import { HandoffProvider, useHandoff } from './context/HandoffContext';
 import { LanguageProvider } from './i18n/LanguageContext';
 import { DemoToolbar } from './components/common/DemoToolbar';
+import { BlindCornerAlertModal } from './components/common/BlindCornerAlertModal';
 import { AppWindowLayout } from './components/common/AppWindowLayout';
 import { HomeScreen } from './components/screens/HomeScreen';
 import { WorkerTaskDetailScreen } from './components/screens/WorkerTaskDetailScreen';
@@ -40,6 +41,9 @@ const MainApp: React.FC = () => {
 
       {/* Discreet Demo Assistant Helper & Drawer (Shortcut: Alt + D) */}
       <DemoToolbar />
+
+      {/* Module 2: Accessible Blind-Corner Safety Alert Modal */}
+      <BlindCornerAlertModal />
     </div>
   );
 };

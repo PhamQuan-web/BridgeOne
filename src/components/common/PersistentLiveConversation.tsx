@@ -18,8 +18,14 @@ import {
   Check,
   Plus,
   Trash2,
+  BookMarked,
+  ShieldAlert,
+  Headphones,
+  Settings,
 } from 'lucide-react';
 import { AnAvatar, MinhAvatar } from '../common/BrandGraphics';
+
+const EMOJI_OPTIONS = ['💬', '📦', '⚠️', '⚙️', '🙋', '🚻', '🔄', '🛑', '👍', '✅', '🔧'];
 
 export const PersistentLiveConversation: React.FC = () => {
   const {
@@ -29,6 +35,7 @@ export const PersistentLiveConversation: React.FC = () => {
     summarizeLiveConversation,
     addCustomQuickOption,
     removeCustomQuickOption,
+    triggerSafetyAlert,
   } = useHandoff();
   const { language, t } = useLanguage();
   const [isExpanded, setIsExpanded] = useState<boolean>(false);
@@ -40,7 +47,8 @@ export const PersistentLiveConversation: React.FC = () => {
     safetyAlert: string;
   } | null>(null);
 
-  // Custom Quick Option Creation modal / inline form
+  // Prepared Responses Studio (Sổ tay câu thoại chuẩn bị trước)
+  const [isStudioOpen, setIsStudioOpen] = useState<boolean>(false);
   const [isAddingOption, setIsAddingOption] = useState<boolean>(false);
   const [newOptIcon, setNewOptIcon] = useState<string>('💬');
   const [newOptLabel, setNewOptLabel] = useState<string>('');
@@ -52,7 +60,6 @@ export const PersistentLiveConversation: React.FC = () => {
   const [noiseStatus, setNoiseStatus] = useState<'quiet' | 'speaking' | 'loud'>('quiet');
   const [speechActive, setSpeechActive] = useState<boolean>(false);
   const [interimText, setInterimText] = useState<string>('');
-  const [isSignSheetOpen, setIsSignSheetOpen] = useState<boolean>(false);
   const [captionScale, setCaptionScale] = useState<'normal' | 'large' | 'huge'>('large');
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -63,6 +70,7 @@ export const PersistentLiveConversation: React.FC = () => {
   const animFrameRef = useRef<number | null>(null);
 
   const latestMessage = state.liveTranscriptLog[state.liveTranscriptLog.length - 1];
+  const isLeader = state.activePersona === 'facilitator';
 
   const getSpeechLang = () => {
     switch (language) {
@@ -105,7 +113,6 @@ export const PersistentLiveConversation: React.FC = () => {
           sum += dataArray[i];
         }
         const avg = sum / dataArray.length;
-        // Map average volume (0 - 128) to 0 - 100 scale
         const normalized = Math.min(100, Math.round((avg / 60) * 100));
         setAudioLevel(normalized);
 
@@ -122,7 +129,6 @@ export const PersistentLiveConversation: React.FC = () => {
 
       checkVolume();
     } catch {
-      // In case user denies mic access or browser sandbox, provide responsive simulated ambient pulse
       simulateAmbientLevel();
     }
   };
@@ -179,7 +185,7 @@ export const PersistentLiveConversation: React.FC = () => {
             const transcript = event.results[i][0].transcript;
             if (event.results[i].isFinal) {
               if (transcript.trim()) {
-                const sender = state.activePersona === 'facilitator' ? 'An' : 'Minh';
+                const sender = isLeader ? 'An' : 'Minh';
                 sendLiveMessage(transcript.trim(), sender);
                 setInterimText('');
               }
@@ -218,9 +224,7 @@ export const PersistentLiveConversation: React.FC = () => {
       if (recognitionRef.current) {
         try {
           recognitionRef.current.stop();
-        } catch {
-          // Ignore
-        }
+        } catch {}
       }
       stopAudioMeter();
     };
@@ -234,9 +238,7 @@ export const PersistentLiveConversation: React.FC = () => {
         try {
           recognitionRef.current.start();
           setSpeechActive(true);
-        } catch {
-          // Already started
-        }
+        } catch {}
       }
     } else {
       stopAudioMeter();
@@ -245,9 +247,7 @@ export const PersistentLiveConversation: React.FC = () => {
           recognitionRef.current.stop();
           setSpeechActive(false);
           setInterimText('');
-        } catch {
-          // Ignore
-        }
+        } catch {}
       }
     }
   }, [state.isLiveMicActive]);
@@ -261,8 +261,11 @@ export const PersistentLiveConversation: React.FC = () => {
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputText.trim()) return;
-    const sender = state.activePersona === 'facilitator' ? 'An' : 'Minh';
+    const sender = isLeader ? 'An' : 'Minh';
     sendLiveMessage(inputText, sender);
+    if (!isLeader) {
+      handleSpeakText(inputText);
+    }
     setInputText('');
   };
 
@@ -285,9 +288,28 @@ export const PersistentLiveConversation: React.FC = () => {
         utterance.lang = getSpeechLang();
         window.speechSynthesis.speak(utterance);
       }
-    } catch {
-      // Ignored
-    }
+    } catch {}
+  };
+
+  const handleTriggerQuickOption = (option: { messageText: string; speechText?: string }) => {
+    const sender = isLeader ? 'An' : 'Minh';
+    sendLiveMessage(option.messageText, sender);
+    handleSpeakText(option.speechText || option.messageText);
+  };
+
+  const handleSaveNewQuickOption = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newOptLabel.trim() || !newOptMessage.trim()) return;
+    addCustomQuickOption({
+      icon: newOptIcon,
+      label: newOptLabel.trim(),
+      messageText: newOptMessage.trim(),
+      speechText: (newOptSpeech || newOptMessage).trim(),
+    });
+    setNewOptLabel('');
+    setNewOptMessage('');
+    setNewOptSpeech('');
+    setIsAddingOption(false);
   };
 
   return (
@@ -295,16 +317,26 @@ export const PersistentLiveConversation: React.FC = () => {
       {/* FLOATING PERSISTENT LIVE CONVERSATION WIDGET */}
       <div
         id="persistent-live-conversation"
-        className="fixed bottom-3 right-4 z-30 select-none max-w-[calc(100vw-2rem)] md:max-w-xl transition-all duration-300"
+        className={`fixed bottom-3 right-4 z-30 select-none transition-all duration-300 ${
+          isExpanded ? 'w-[calc(100vw-2rem)] md:w-[620px]' : 'max-w-[calc(100vw-2rem)] md:max-w-xl'
+        }`}
       >
         <div className="bg-white/95 backdrop-blur-md rounded-2xl border border-slate-200/90 shadow-xl overflow-hidden ring-1 ring-slate-900/5">
-          {/* TOP BAR: Clean, Real Workplace Communication Bar */}
-          <div className="px-3.5 py-2.5 bg-gradient-to-r from-blue-50/95 via-slate-50 to-white flex items-center justify-between gap-3 border-b border-slate-200/80">
-            {/* Left: Live status with Sound Level Visualizer (Cho người khiếm thính biết xưởng đang nói hay ồn) */}
+          {/* TOP BAR: Role-Adaptive Bar (Leader vs Worker) */}
+          <div className={`px-3.5 py-2.5 flex items-center justify-between gap-2.5 border-b transition-colors ${
+            isLeader
+              ? 'bg-gradient-to-r from-amber-50/95 via-orange-50/70 to-white border-amber-200/80'
+              : 'bg-gradient-to-r from-blue-50/95 via-indigo-50/60 to-white border-slate-200/80'
+          }`}>
+            {/* Left: Role Tag & Live STT/TTS indicator */}
             <div className="flex items-center gap-2 min-w-0">
               <div
                 className="relative shrink-0 flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white border border-slate-200 shadow-2xs"
-                title={state.isLiveMicActive ? 'Mic & Cảm biến âm thanh đang bật' : 'Nhận diện giọng nói & Trợ thị'}
+                title={
+                  isLeader
+                    ? 'Quản lý An: Nói vào mic để hiện phụ đề cho Minh; nhận âm thanh TTS từ Minh'
+                    : 'Công nhân Minh: Nhận diện giọng nói thành phụ đề & Trợ thị'
+                }
               >
                 <span className="flex h-2 w-2 relative">
                   {state.isLiveMicActive && (
@@ -317,12 +349,23 @@ export const PersistentLiveConversation: React.FC = () => {
                   />
                 </span>
                 <span className="text-[11px] font-extrabold text-slate-800 tracking-tight">
-                  {state.isLiveMicActive ? 'Live STT' : 'Phụ đề trực tiếp'}
+                  {isLeader ? (state.isLiveMicActive ? 'Mic Lệnh BẬT' : 'Cầu lệnh An') : (state.isLiveMicActive ? 'Live STT' : 'Phụ đề Minh')}
                 </span>
               </div>
 
-              {/* Ambient Noise Level Indicator for Deaf Workers */}
-              {state.isLiveMicActive && (
+              {/* Leader Audio Monitor Badge */}
+              {isLeader && (
+                <div
+                  className="hidden sm:flex items-center gap-1 px-2 py-0.5 rounded-full bg-emerald-50 border border-emerald-200 text-emerald-800 text-[10px] font-bold"
+                  title="Loa TTS tự động phát to khi Minh bấm câu phản hồi nhanh"
+                >
+                  <Headphones className="w-3 h-3 text-emerald-600" />
+                  <span>Loa TTS: BẬT</span>
+                </div>
+              )}
+
+              {/* Sound Level Visualizer for Worker (Đo độ ồn xưởng) */}
+              {state.isLiveMicActive && !isLeader && (
                 <div
                   className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold transition border ${
                     noiseStatus === 'loud'
@@ -331,77 +374,68 @@ export const PersistentLiveConversation: React.FC = () => {
                       ? 'bg-amber-50 text-amber-800 border-amber-200'
                       : 'bg-emerald-50 text-emerald-700 border-emerald-200'
                   }`}
-                  title={`Âm lượng môi trường xung quanh: ${audioLevel}%. ${
-                    noiseStatus === 'speaking' ? 'Có người đang nói chuyện' : noiseStatus === 'loud' ? 'Môi trường ồn ào' : 'Xưởng yên tĩnh'
+                  title={`Âm lượng xưởng: ${audioLevel}%. ${
+                    noiseStatus === 'speaking' ? 'Có người đang nói' : noiseStatus === 'loud' ? 'Xưởng ồn ào' : 'Yên tĩnh'
                   }`}
                 >
                   <Activity className="w-3 h-3 shrink-0" />
-                  {/* Dynamic 4-bar sound level equalizer */}
                   <div className="flex items-end gap-0.5 h-3">
-                    <span
-                      className={`w-0.5 rounded-full transition-all duration-150 ${
-                        audioLevel > 10 ? 'bg-current h-1.5' : 'bg-slate-300 h-1'
-                      }`}
-                    />
-                    <span
-                      className={`w-0.5 rounded-full transition-all duration-150 ${
-                        audioLevel > 25 ? 'bg-current h-2.5' : 'bg-slate-300 h-1'
-                      }`}
-                    />
-                    <span
-                      className={`w-0.5 rounded-full transition-all duration-150 ${
-                        audioLevel > 50 ? 'bg-current h-3' : 'bg-slate-300 h-1'
-                      }`}
-                    />
-                    <span
-                      className={`w-0.5 rounded-full transition-all duration-150 ${
-                        audioLevel > 75 ? 'bg-current h-3.5' : 'bg-slate-300 h-1'
-                      }`}
-                    />
+                    <span className={`w-0.5 rounded-full transition-all duration-150 ${audioLevel > 10 ? 'bg-current h-1.5' : 'bg-slate-300 h-1'}`} />
+                    <span className={`w-0.5 rounded-full transition-all duration-150 ${audioLevel > 25 ? 'bg-current h-2.5' : 'bg-slate-300 h-1'}`} />
+                    <span className={`w-0.5 rounded-full transition-all duration-150 ${audioLevel > 50 ? 'bg-current h-3' : 'bg-slate-300 h-1'}`} />
+                    <span className={`w-0.5 rounded-full transition-all duration-150 ${audioLevel > 75 ? 'bg-current h-3.5' : 'bg-slate-300 h-1'}`} />
                   </div>
                   <span className="font-mono text-[9px]">{audioLevel}%</span>
-                  <span className="hidden sm:inline">
-                    {noiseStatus === 'speaking' ? 'Đang nói' : noiseStatus === 'loud' ? 'Xưởng ồn' : 'Yên tĩnh'}
-                  </span>
                 </div>
               )}
             </div>
 
-            {/* Right: AI Catch-up, Quick Visual Sign, Mic STT & Expand/Collapse */}
+            {/* Right Controls */}
             <div className="flex items-center gap-1.5 shrink-0">
-              {/* Caption Scale Toggle (Phóng to cỡ chữ phụ đề cho người khiếm thính) */}
+              {/* Module 2: Quick Test Blind-Corner Alert Button (Crucial for Demo/Video) */}
+              <button
+                type="button"
+                onClick={() => triggerSafetyAlert('RIGHT', 'trolley')}
+                className="px-2 py-1 rounded-lg text-[10px] font-black bg-rose-50 hover:bg-rose-100 text-rose-700 transition flex items-center gap-1 border border-rose-300 shadow-2xs"
+                title="Bấm để kích hoạt cảnh báo vật cản góc mù (Module 2 Accessible Safety)"
+              >
+                <ShieldAlert className="w-3.5 h-3.5 text-rose-600 animate-pulse" />
+                <span className="hidden sm:inline">Test Góc Mù</span>
+              </button>
+
+              {/* Sổ tay câu thoại chuẩn bị trước (Prepared Responses Studio) */}
+              <button
+                type="button"
+                onClick={() => {
+                  setIsStudioOpen(!isStudioOpen);
+                  setIsExpanded(true);
+                }}
+                className={`px-2 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 transition border ${
+                  isStudioOpen
+                    ? 'bg-blue-600 text-white border-blue-700 shadow-2xs'
+                    : 'bg-white hover:bg-blue-50 text-slate-700 hover:text-blue-700 border-slate-200'
+                }`}
+                title="Sổ tay câu thoại chuẩn bị trước cho người khiếm thính"
+              >
+                <BookMarked className="w-3.5 h-3.5 text-blue-500" />
+                <span className="hidden sm:inline">Sổ câu sẵn</span>
+              </button>
+
+              {/* Font Scale (Aa) */}
               <button
                 type="button"
                 onClick={() => {
                   setCaptionScale((prev) => (prev === 'normal' ? 'large' : prev === 'large' ? 'huge' : 'normal'));
                 }}
                 className="px-2 py-1 rounded-lg text-xs font-black bg-slate-100 hover:bg-slate-200 text-slate-700 transition flex items-center gap-1 border border-slate-200"
-                title={`Cỡ chữ phụ đề: ${captionScale === 'normal' ? 'Chuẩn' : captionScale === 'large' ? 'Lớn' : 'Rất lớn'} (Bấm để đổi)`}
+                title={`Cỡ chữ phụ đề: ${captionScale === 'normal' ? 'Chuẩn' : captionScale === 'large' ? 'Lớn' : 'Rất lớn'}`}
               >
                 <span className={captionScale === 'huge' ? 'text-blue-600 font-black text-sm' : captionScale === 'large' ? 'text-blue-600 font-bold' : ''}>
                   Aa{captionScale === 'huge' ? '++' : captionScale === 'large' ? '+' : ''}
                 </span>
               </button>
 
-              {/* Deaf Friendly Quick Sign/Icon Sheet Button */}
-              <button
-                type="button"
-                onClick={() => {
-                  setIsSignSheetOpen(!isSignSheetOpen);
-                  setIsExpanded(true);
-                }}
-                className={`px-2 py-1 rounded-lg text-[10px] font-bold flex items-center gap-1 transition border ${
-                  isSignSheetOpen
-                    ? 'bg-blue-600 text-white border-blue-700 shadow-2xs'
-                    : 'bg-white hover:bg-blue-50 text-slate-700 hover:text-blue-700 border-slate-200'
-                }`}
-                title="Giao tiếp trực quan nhanh cho người khiếm thính"
-              >
-                <Smile className="w-3.5 h-3.5 text-blue-500" />
-                <span className="hidden sm:inline">Thao tác nhanh</span>
-              </button>
-
-              {/* AI Catch-up Summary Toggle Button */}
+              {/* AI Catch-up */}
               <button
                 id="btn-ai-catchup-summary"
                 onClick={handleOpenSummary}
@@ -413,10 +447,10 @@ export const PersistentLiveConversation: React.FC = () => {
                 title="Tóm tắt điểm tin ca trực bằng AI"
               >
                 <Sparkles className="w-3.5 h-3.5 text-indigo-500" />
-                <span className="hidden sm:inline">AI Catch-up</span>
+                <span className="hidden md:inline">AI Catch-up</span>
               </button>
 
-              {/* Mic STT Toggle (Real Web Speech Recognition) */}
+              {/* Mic STT Toggle */}
               <button
                 id="btn-toggle-live-mic"
                 onClick={toggleLiveMic}
@@ -425,26 +459,24 @@ export const PersistentLiveConversation: React.FC = () => {
                     ? 'bg-rose-500 text-white shadow-xs ring-2 ring-rose-300 animate-pulse'
                     : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
                 }`}
-                title={state.isLiveMicActive ? 'Đang nhận diện giọng nói (Nhấn để tắt)' : 'Bật nhận diện giọng nói (STT)'}
+                title={
+                  state.isLiveMicActive
+                    ? 'Đang nhận diện giọng nói (Bấm để tắt)'
+                    : isLeader
+                    ? 'Bật mic để nói lệnh cho Minh'
+                    : 'Bật nhận diện giọng nói nhà xưởng (STT)'
+                }
               >
-                {state.isLiveMicActive ? (
-                  <Mic className="w-3.5 h-3.5" />
-                ) : (
-                  <MicOff className="w-3.5 h-3.5" />
-                )}
+                {state.isLiveMicActive ? <Mic className="w-3.5 h-3.5" /> : <MicOff className="w-3.5 h-3.5" />}
               </button>
 
-              {/* Expand/Collapse Toggle */}
+              {/* Expand/Collapse */}
               <button
                 onClick={() => setIsExpanded(!isExpanded)}
                 className="p-1.5 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 transition"
                 title={isExpanded ? 'Thu gọn khung hội thoại' : 'Mở rộng khung hội thoại'}
               >
-                {isExpanded ? (
-                  <ChevronDown className="w-4 h-4" />
-                ) : (
-                  <ChevronUp className="w-4 h-4" />
-                )}
+                {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronUp className="w-4 h-4" />}
               </button>
             </div>
           </div>
@@ -456,7 +488,7 @@ export const PersistentLiveConversation: React.FC = () => {
               className="px-4 py-2 hover:bg-slate-50/80 cursor-pointer flex items-center justify-between gap-3 text-xs transition"
             >
               <div className="flex items-center gap-2 truncate">
-                <span className="font-extrabold text-blue-700 shrink-0">
+                <span className={`font-extrabold shrink-0 ${latestMessage.sender === 'An' ? 'text-amber-800' : 'text-blue-700'}`}>
                   {latestMessage.sender}:
                 </span>
                 <span className="text-slate-700 truncate font-medium">
@@ -480,10 +512,10 @@ export const PersistentLiveConversation: React.FC = () => {
             </div>
           )}
 
-          {/* EXPANDED LIVE CHAT LOG & QUICK COMPOSER */}
+          {/* EXPANDED LIVE CHAT LOG & PREPARED RESPONSES STUDIO */}
           {isExpanded && (
             <div className="p-3.5 space-y-3">
-              {/* Seamless Inline AI Catch-up Card right inside the stream */}
+              {/* Seamless Inline AI Catch-up Card */}
               {showInlineSummary && summaryData && (
                 <div className="p-3.5 rounded-xl bg-gradient-to-br from-indigo-50/90 via-blue-50/70 to-slate-50 border border-indigo-200/90 text-xs shadow-xs animate-in fade-in duration-200 space-y-2.5">
                   <div className="flex items-center justify-between">
@@ -511,7 +543,6 @@ export const PersistentLiveConversation: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Summary Core Note */}
                   <div className="bg-white/80 p-2.5 rounded-lg border border-indigo-100/80 text-slate-800 leading-relaxed font-medium">
                     <p className="font-bold text-slate-900 mb-1">{summaryData.summary}</p>
                     <div className="space-y-1 mt-1.5 border-t border-slate-100 pt-1.5">
@@ -526,7 +557,6 @@ export const PersistentLiveConversation: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Safety Alert */}
                   <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-amber-50 border border-amber-200 text-amber-900 text-[11px]">
                     <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
                     <span className="font-semibold">{summaryData.safetyAlert}</span>
@@ -534,22 +564,22 @@ export const PersistentLiveConversation: React.FC = () => {
                 </div>
               )}
 
-              {/* Real-time Interim Live Voice STT Bubble (khi có người đang nói qua mic) */}
+              {/* Real-time Interim Live Voice STT Bubble */}
               {state.isLiveMicActive && (
                 <div className="p-2.5 rounded-xl bg-emerald-50/90 border border-emerald-200 text-xs text-emerald-950 flex items-center gap-2.5 animate-pulse">
                   <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 shrink-0" />
                   <div className="flex-1 min-w-0">
                     <div className="font-extrabold text-[10px] uppercase text-emerald-800 tracking-wider">
-                      Đang lắng nghe trực tiếp từ xưởng...
+                      {isLeader ? 'Đang lắng nghe chỉ đạo giọng nói của Quản lý An...' : 'Đang lắng nghe trực tiếp từ xưởng...'}
                     </div>
                     <div className="font-medium truncate text-slate-800">
-                      {interimText || 'Nói vào micro để chuyển tự động thành phụ đề...'}
+                      {interimText || 'Nói vào micro để chuyển tự động thành phụ đề thời gian thực...'}
                     </div>
                   </div>
                 </div>
               )}
 
-              {/* Message List */}
+              {/* Message Stream */}
               <div className="max-h-56 overflow-y-auto space-y-2.5 pr-1 text-xs">
                 {state.liveTranscriptLog.map((item) => (
                   <div
@@ -561,18 +591,14 @@ export const PersistentLiveConversation: React.FC = () => {
                     }`}
                   >
                     <div className="shrink-0 mt-0.5">
-                      {item.sender === 'An' ? (
-                        <AnAvatar size="w-6 h-6" />
-                      ) : (
-                        <MinhAvatar size="w-6 h-6" name="M" />
-                      )}
+                      {item.sender === 'An' ? <AnAvatar size="w-6 h-6" /> : <MinhAvatar size="w-6 h-6" name="M" />}
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-2">
                         <span className="font-bold text-slate-900">
                           {item.sender}{' '}
                           <span className="text-[10px] text-slate-400 font-normal">
-                            ({item.role === 'lead' ? t('role.lead', 'Quản lý') : t('role.worker', 'Công nhân')})
+                            ({item.role === 'lead' ? 'Quản lý' : 'Công nhân'})
                           </span>
                         </span>
                         <div className="flex items-center gap-1 text-[10px] text-slate-400">
@@ -598,122 +624,185 @@ export const PersistentLiveConversation: React.FC = () => {
                 <div ref={messagesEndRef} />
               </div>
 
-              {/* DEAF ACCESSIBILITY: Fast Communication Action Sheet */}
-              {isSignSheetOpen && (
-                <div className="p-3 bg-blue-50/90 rounded-xl border border-blue-200 text-sm space-y-2.5 animate-in fade-in duration-150">
-                  <div className="flex items-center justify-between">
-                    <span className="font-extrabold text-xs text-blue-900 flex items-center gap-1.5">
-                      <Eye className="w-4 h-4 text-blue-600" />
-                      Giao tiếp không lời (Người khiếm thính ↔ Quản lý)
-                    </span>
-                    <button
-                      type="button"
-                      onClick={() => setIsSignSheetOpen(false)}
-                      className="text-slate-400 hover:text-slate-700 p-1"
-                    >
-                      <X className="w-4 h-4" />
-                    </button>
+              {/* SỔ TAY CÂU THOẠI CHUẨN BỊ TRƯỚC (PREPARED RESPONSES STUDIO) */}
+              {isStudioOpen && (
+                <div className="p-3 bg-blue-50/90 rounded-2xl border border-blue-200 text-xs space-y-3 animate-in fade-in duration-150">
+                  <div className="flex items-center justify-between border-b border-blue-200/80 pb-2">
+                    <div className="flex items-center gap-1.5 text-blue-950 font-black">
+                      <BookMarked className="w-4 h-4 text-blue-600" />
+                      <span>Sổ tay câu thoại chuẩn bị trước ({state.customQuickOptions.length})</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setIsAddingOption(!isAddingOption)}
+                        className="px-2 py-0.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-[10px] font-bold flex items-center gap-1 shadow-2xs"
+                      >
+                        <Plus className="w-3 h-3" />
+                        <span>Soạn câu mới</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setIsStudioOpen(false)}
+                        className="text-slate-400 hover:text-slate-700 p-0.5"
+                      >
+                        <X className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
-                  <div className="grid grid-cols-2 gap-2">
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const sender = state.activePersona === 'facilitator' ? 'An' : 'Minh';
-                        sendLiveMessage('Minh xác nhận: Đã hoàn tất bước này an toàn!', sender);
-                        handleSpeakText('Minh đã hoàn tất bước này an toàn!');
-                        setIsSignSheetOpen(false);
-                      }}
-                      className="p-2.5 bg-white hover:bg-emerald-50 hover:text-emerald-800 border border-slate-200 rounded-xl font-bold text-xs sm:text-sm text-left transition flex items-center gap-2 shadow-2xs"
-                    >
-                      <span className="text-lg">👍</span>
-                      <span className="truncate">Đã xong / OK</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const sender = state.activePersona === 'facilitator' ? 'An' : 'Minh';
-                        sendLiveMessage('Cần quản lý qua hỗ trợ tại vị trí của tôi!', sender);
-                        handleSpeakText('Cần quản lý hỗ trợ tại vị trí!');
-                        setIsSignSheetOpen(false);
-                      }}
-                      className="p-2.5 bg-white hover:bg-rose-50 hover:text-rose-800 border border-slate-200 rounded-xl font-bold text-xs sm:text-sm text-left transition flex items-center gap-2 shadow-2xs"
-                    >
-                      <span className="text-lg">🙋</span>
-                      <span className="truncate">Cần hỗ trợ gấp</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const sender = state.activePersona === 'facilitator' ? 'An' : 'Minh';
-                        sendLiveMessage('Khay linh kiện đã đầy, xin chỉ đạo vị trí tiếp theo!', sender);
-                        handleSpeakText('Khay linh kiện đã đầy, xin chỉ đạo vị trí tiếp theo!');
-                        setIsSignSheetOpen(false);
-                      }}
-                      className="p-2.5 bg-white hover:bg-blue-50 hover:text-blue-800 border border-slate-200 rounded-xl font-bold text-xs sm:text-sm text-left transition flex items-center gap-2 shadow-2xs"
-                    >
-                      <span className="text-lg">📦</span>
-                      <span className="truncate">Đầy khay chứa</span>
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        const sender = state.activePersona === 'facilitator' ? 'An' : 'Minh';
-                        sendLiveMessage('Xin nhắc lại thao tác này rõ hơn bằng hình ảnh hoặc văn bản!', sender);
-                        handleSpeakText('Xin nhắc lại thao tác này rõ hơn!');
-                        setIsSignSheetOpen(false);
-                      }}
-                      className="p-2.5 bg-white hover:bg-amber-50 hover:text-amber-800 border border-slate-200 rounded-xl font-bold text-xs sm:text-sm text-left transition flex items-center gap-2 shadow-2xs"
-                    >
-                      <span className="text-lg">🔄</span>
-                      <span className="truncate">Xin nhắc lại</span>
-                    </button>
+
+                  {/* Inline New Option Creation Form */}
+                  {isAddingOption && (
+                    <form onSubmit={handleSaveNewQuickOption} className="p-3 bg-white rounded-xl border border-blue-200 space-y-2.5 shadow-xs">
+                      <div className="text-[11px] font-extrabold text-slate-800">Soạn câu thoại sẵn cho ca trực của bạn</div>
+
+                      {/* Icon selector */}
+                      <div className="flex items-center gap-1.5 overflow-x-auto pb-1">
+                        {EMOJI_OPTIONS.map((em) => (
+                          <button
+                            key={em}
+                            type="button"
+                            onClick={() => setNewOptIcon(em)}
+                            className={`w-7 h-7 rounded-lg text-sm flex items-center justify-center border transition ${
+                              newOptIcon === em ? 'bg-blue-100 border-blue-600 ring-1 ring-blue-500' : 'bg-slate-50 border-slate-200 hover:bg-slate-100'
+                            }`}
+                          >
+                            {em}
+                          </button>
+                        ))}
+                      </div>
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <input
+                          type="text"
+                          value={newOptLabel}
+                          onChange={(e) => setNewOptLabel(e.target.value)}
+                          placeholder="Nhãn nút (Ví dụ: Hết phôi)"
+                          className="px-3 py-1.5 bg-slate-50 rounded-lg border border-slate-200 text-xs font-semibold text-slate-900 focus:outline-hidden focus:ring-1 focus:ring-blue-600"
+                        />
+                        <input
+                          type="text"
+                          value={newOptSpeech}
+                          onChange={(e) => setNewOptSpeech(e.target.value)}
+                          placeholder="Câu loa đọc TTS (Tùy chọn)"
+                          className="px-3 py-1.5 bg-slate-50 rounded-lg border border-slate-200 text-xs text-slate-900 focus:outline-hidden focus:ring-1 focus:ring-blue-600"
+                        />
+                      </div>
+
+                      <input
+                        type="text"
+                        value={newOptMessage}
+                        onChange={(e) => setNewOptMessage(e.target.value)}
+                        placeholder="Nội dung gửi vào chat (Ví dụ: Khay linh kiện đã hết phôi, cần cấp thêm!)"
+                        className="w-full px-3 py-1.5 bg-slate-50 rounded-lg border border-slate-200 text-xs text-slate-900 focus:outline-hidden focus:ring-1 focus:ring-blue-600"
+                      />
+
+                      <div className="flex items-center justify-end gap-2 pt-1">
+                        <button
+                          type="button"
+                          onClick={() => setIsAddingOption(false)}
+                          className="px-2.5 py-1 text-slate-500 hover:text-slate-800 text-[11px] font-bold"
+                        >
+                          Hủy
+                        </button>
+                        <button
+                          type="submit"
+                          disabled={!newOptLabel.trim() || !newOptMessage.trim()}
+                          className="px-3 py-1 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white rounded-lg text-[11px] font-bold shadow-2xs"
+                        >
+                          Lưu vào sổ câu sẵn
+                        </button>
+                      </div>
+                    </form>
+                  )}
+
+                  {/* Grid of Prepared Canned Responses (1-Tap to Send & Speak) */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-48 overflow-y-auto pr-0.5">
+                    {state.customQuickOptions.map((opt) => (
+                      <div
+                        key={opt.id}
+                        className="group p-2.5 bg-white hover:bg-blue-50/70 border border-slate-200 rounded-xl transition flex items-center justify-between gap-2 shadow-2xs"
+                      >
+                        <button
+                          type="button"
+                          onClick={() => handleTriggerQuickOption(opt)}
+                          className="flex items-center gap-2 text-left flex-1 min-w-0"
+                          title={`Chạm để gửi và phát loa: "${opt.messageText}"`}
+                        >
+                          <span className="text-lg shrink-0">{opt.icon}</span>
+                          <div className="min-w-0">
+                            <div className="font-extrabold text-slate-900 text-xs truncate group-hover:text-blue-700">
+                              {opt.label}
+                            </div>
+                            <div className="text-[10px] text-slate-500 truncate">
+                              {opt.messageText}
+                            </div>
+                          </div>
+                        </button>
+
+                        <div className="flex items-center gap-1 shrink-0">
+                          <button
+                            type="button"
+                            onClick={() => handleSpeakText(opt.speechText || opt.messageText)}
+                            className="p-1 rounded text-slate-400 hover:text-blue-600 hover:bg-slate-100"
+                            title="Nghe thử âm thanh phát loa"
+                          >
+                            <Volume2 className="w-3.5 h-3.5" />
+                          </button>
+                          {!opt.isDefault && (
+                            <button
+                              type="button"
+                              onClick={() => removeCustomQuickOption(opt.id)}
+                              className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50"
+                              title="Xóa câu này"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}
 
-              {/* Quick Template Chips - Large & High Contrast */}
+              {/* HORIZONTAL ONE-TAP CHIP STRIP */}
               <div className="flex items-center gap-2 overflow-x-auto pb-1 select-none">
-                <button
-                  type="button"
-                  onClick={() => {
-                    const sender = state.activePersona === 'facilitator' ? 'An' : 'Minh';
-                    sendLiveMessage('Minh xác nhận: Đã hoàn tất bước này an toàn!', sender);
-                  }}
-                  className="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-emerald-50 hover:text-emerald-800 text-slate-800 text-xs sm:text-sm font-bold whitespace-nowrap transition border border-slate-200 shadow-2xs"
-                >
-                  👍 {t('live.chip_completed', 'Đã hoàn tất')}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const sender = state.activePersona === 'facilitator' ? 'An' : 'Minh';
-                    sendLiveMessage('Cần quản lý qua hỗ trợ tại trạm!', sender);
-                  }}
-                  className="px-3.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs sm:text-sm font-bold whitespace-nowrap transition border-2 border-amber-300 shadow-2xs"
-                >
-                  ⚠️ {t('live.chip_help', 'Cần hỗ trợ')}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    const sender = state.activePersona === 'facilitator' ? 'An' : 'Minh';
-                    sendLiveMessage('Vật tư đã đầy, xin lệnh chuyển tiếp!', sender);
-                  }}
-                  className="px-3.5 py-1.5 rounded-xl bg-slate-100 hover:bg-blue-50 hover:text-blue-800 text-slate-800 text-xs sm:text-sm font-bold whitespace-nowrap transition border border-slate-200 shadow-2xs"
-                >
-                  📦 {t('live.chip_material', 'Đầy vật tư')}
-                </button>
+                {state.customQuickOptions.slice(0, 4).map((opt) => (
+                  <button
+                    key={opt.id}
+                    type="button"
+                    onClick={() => handleTriggerQuickOption(opt)}
+                    className="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-blue-50 hover:text-blue-800 text-slate-800 text-xs font-bold whitespace-nowrap transition border border-slate-200 shadow-2xs flex items-center gap-1.5 shrink-0"
+                  >
+                    <span>{opt.icon}</span>
+                    <span>{opt.label}</span>
+                  </button>
+                ))}
+
+                {isLeader && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      sendLiveMessage('An duyệt: Thao tác chính xác, tiếp tục sang công đoạn tiếp theo!', 'An');
+                      handleSpeakText('Thao tác chính xác, tiếp tục sang công đoạn tiếp theo!');
+                    }}
+                    className="px-3 py-1.5 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 text-xs font-bold whitespace-nowrap transition border border-amber-300 shadow-2xs shrink-0"
+                  >
+                    👍 Lệnh duyệt nhanh
+                  </button>
+                )}
               </div>
 
-              {/* Input Form with Audio & Text - Scaled up */}
+              {/* Input Form with Audio & Text */}
               <form onSubmit={handleSendMessage} className="flex items-center gap-2 pt-1">
                 <input
                   type="text"
                   value={inputText}
                   onChange={(e) => setInputText(e.target.value)}
                   placeholder={
-                    state.activePersona === 'facilitator'
-                      ? 'Nhập chỉ đạo hoặc nói qua mic...'
+                    isLeader
+                      ? 'Nhập chỉ đạo hoặc nói qua mic (chuyển phụ đề cho Minh)...'
                       : 'Nhập tin nhắn (tự động phát loa TTS cho quản lý nghe)...'
                   }
                   className="flex-1 bg-slate-50 hover:bg-slate-100/70 focus:bg-white border border-slate-200 rounded-xl px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 transition"

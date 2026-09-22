@@ -23,6 +23,7 @@ export const DemoToolbar: React.FC = () => {
     toggleDemoDrawer,
     setDemoDrawerOpen,
     setGoldenFlowState,
+    triggerSafetyAlert,
   } = useHandoff();
 
   // Keyboard shortcuts:
@@ -30,6 +31,7 @@ export const DemoToolbar: React.FC = () => {
   // Alt + 1: State 1 (Nhận việc & Khay A đầy)
   // Alt + 2: State 2 (Minh hỏi & Cờ đỏ)
   // Alt + 3: State 3 (An duyệt & Tem bằng chứng)
+  // Alt + 4: Module 2 (Cảnh báo góc mù phi âm thanh)
   // Alt + R: Reset
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -45,6 +47,9 @@ export const DemoToolbar: React.FC = () => {
       } else if (e.altKey && e.key === '3') {
         e.preventDefault();
         setGoldenFlowState(3);
+      } else if (e.altKey && e.key === '4') {
+        e.preventDefault();
+        triggerSafetyAlert('RIGHT', 'trolley');
       } else if (e.altKey && e.key.toLowerCase() === 'r') {
         e.preventDefault();
         resetDemo();
@@ -225,6 +230,34 @@ export const DemoToolbar: React.FC = () => {
                     </div>
                     <p className="text-[11px] text-slate-600 mt-1.5 leading-snug">
                       An phản hồi đồng ý. Bước 2 viền xanh highlight đổi thành <strong>&ldquo;Place in tray Tray B&rdquo;</strong> kèm badge <strong>[Updated]</strong> và tem: <strong>&ldquo;✔ Verified by An (Lead) · Provenance: Worker Question Handoff&rdquo;</strong>.
+                    </p>
+                  </button>
+
+                  {/* Trạng thái 4 (Module 2: Cảnh báo góc mù) */}
+                  <button
+                    id="drawer-state-4-btn"
+                    onClick={() => {
+                      triggerSafetyAlert('RIGHT', 'trolley');
+                      setDemoDrawerOpen(false);
+                    }}
+                    className="w-full text-left p-3.5 rounded-2xl border border-rose-300 hover:border-rose-500 bg-rose-50/60 hover:bg-rose-100/60 transition group shadow-2xs"
+                  >
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="w-5 h-5 rounded-full bg-rose-600 text-white font-extrabold text-[10px] flex items-center justify-center">
+                          4
+                        </span>
+                        <span className="font-extrabold text-rose-900 group-hover:text-rose-950 flex items-center gap-1.5">
+                          <span>Module 2: Cảnh báo Góc mù</span>
+                          <span className="text-[10px] bg-rose-200 text-rose-800 px-1.5 py-0.2 rounded font-bold">New</span>
+                        </span>
+                      </div>
+                      <span className="font-mono text-[10px] text-slate-400 bg-white px-1.5 py-0.5 rounded border border-slate-200">
+                        Alt+4
+                      </span>
+                    </div>
+                    <p className="text-[11px] text-rose-800 mt-1.5 leading-snug">
+                      Kích hoạt mô phỏng camera AI phát hiện xe đẩy hàng tiếp cận góc khuất: Bật cảnh báo rung điện thoại và banner chỉ hướng <strong>[BÊN PHẢI]</strong> đếm lùi 3 giây né tránh an toàn.
                     </p>
                   </button>
                 </div>
