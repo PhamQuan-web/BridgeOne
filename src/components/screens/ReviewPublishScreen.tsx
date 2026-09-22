@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useHandoff } from '../../context/HandoffContext';
+import { useLanguage } from '../../i18n/LanguageContext';
 import { RealisticPhoto } from '../common/RealisticPhotos';
 import { MinhAvatar, BotanicalCorner } from '../common/BrandGraphics';
 import {
@@ -21,10 +22,21 @@ export const ReviewPublishScreen: React.FC = () => {
     publishInstruction,
     toggleFacilitatorConfirmation,
   } = useHandoff();
+  const { isVi } = useLanguage();
 
   const [changeLogNote, setChangeLogNote] = useState(
-    'Updated tray location based on question from Minh. Replaced photo with Tray B setup for clarity.'
+    isVi
+      ? 'Đã cập nhật vị trí khay dựa trên câu hỏi từ Minh. Thay ảnh bằng thiết lập Khay B để rõ ràng hơn.'
+      : 'Updated tray location based on question from Minh. Replaced photo with Tray B setup for clarity.'
   );
+
+  useEffect(() => {
+    setChangeLogNote(
+      isVi
+        ? 'Đã cập nhật vị trí khay dựa trên câu hỏi từ Minh. Thay ảnh bằng thiết lập Khay B để rõ ràng hơn.'
+        : 'Updated tray location based on question from Minh. Replaced photo with Tray B setup for clarity.'
+    );
+  }, [isVi]);
 
   const canPublish =
     state.facilitatorCheckedDetails &&
@@ -44,21 +56,23 @@ export const ReviewPublishScreen: React.FC = () => {
           className="flex items-center gap-2 text-xs font-bold text-slate-600 hover:text-slate-900 transition"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Back to instruction</span>
+          <span>{isVi ? 'Quay lại hướng dẫn' : 'Back to instruction'}</span>
         </button>
 
         <span className="text-xs font-semibold text-slate-500">
-          Step 3 of 4: Review before publication
+          {isVi ? 'Bước 3/4: Rà soát trước khi xuất bản' : 'Step 3 of 4: Review before publication'}
         </span>
       </div>
 
       {/* Main Title & Subtitle */}
       <div className="space-y-1">
         <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
-          Review &amp; publish
+          {isVi ? 'Rà soát & Xuất bản' : 'Review & publish'}
         </h1>
         <p className="text-sm text-slate-600">
-          Review all changes before publishing. Everyone on Assembly Line A will see the updated version immediately.
+          {isVi
+            ? 'Rà soát toàn bộ thay đổi trước khi xuất bản. Tất cả thành viên chuyền A sẽ thấy phiên bản cập nhật ngay lập tức.'
+            : 'Review all changes before publishing. Everyone on Assembly Line A will see the updated version immediately.'}
         </p>
       </div>
 
@@ -70,16 +84,16 @@ export const ReviewPublishScreen: React.FC = () => {
           <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-xs space-y-4">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-extrabold text-slate-900">
-                What&apos;s changing
+                {isVi ? 'Nội dung thay đổi' : "What's changing"}
               </h2>
               <span className="text-[11px] font-bold text-blue-700 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-200">
-                Atomic Handoff Verified
+                {isVi ? 'Đã kiểm tra bàn giao chuẩn' : 'Atomic Handoff Verified'}
               </span>
             </div>
 
             <div className="space-y-3">
               <div className="text-xs font-bold text-slate-800">
-                Step 2: Place in tray
+                {isVi ? 'Bước 2: Đặt vào khay' : 'Step 2: Place in tray'}
               </div>
 
               {/* Before vs After comparison cards */}
@@ -87,26 +101,26 @@ export const ReviewPublishScreen: React.FC = () => {
                 {/* Before */}
                 <div className="bg-rose-50/50 border border-rose-200 rounded-xl p-3.5 space-y-2.5">
                   <span className="text-[11px] font-bold text-rose-800 uppercase tracking-wide">
-                    Before
+                    {isVi ? 'Trước' : 'Before'}
                   </span>
                   <div className="h-28 rounded-lg overflow-hidden border border-rose-200 bg-slate-900">
                     <RealisticPhoto type="tray-a" className="w-full h-full" />
                   </div>
                   <p className="text-xs text-slate-600 line-through">
-                    &ldquo;Place the finished unit in Tray A.&rdquo;
+                    {isVi ? '“Đặt chi tiết hoàn thiện vào Khay A.”' : '“Place the finished unit in Tray A.”'}
                   </p>
                 </div>
 
                 {/* After */}
                 <div className="bg-emerald-50/60 border border-emerald-300 rounded-xl p-3.5 space-y-2.5">
                   <span className="text-[11px] font-bold text-emerald-800 uppercase tracking-wide">
-                    After
+                    {isVi ? 'Sau' : 'After'}
                   </span>
                   <div className="h-28 rounded-lg overflow-hidden border border-emerald-300 bg-slate-900">
                     <RealisticPhoto type="tray-b" className="w-full h-full" />
                   </div>
                   <p className="text-xs text-emerald-950 font-bold">
-                    &ldquo;Place the finished unit in Tray B.&rdquo;
+                    {isVi ? '“Đặt chi tiết hoàn thiện vào Khay B.”' : '“Place the finished unit in Tray B.”'}
                   </p>
                 </div>
               </div>
@@ -115,10 +129,12 @@ export const ReviewPublishScreen: React.FC = () => {
               <div className="bg-slate-50 rounded-xl p-3 text-xs text-slate-700 leading-relaxed border border-slate-200/70 space-y-1">
                 <div className="flex items-center gap-1.5 font-bold text-slate-900">
                   <ShieldCheck className="w-4 h-4 text-emerald-600" />
-                  <span>Provenance &amp; Validation</span>
+                  <span>{isVi ? 'Nguồn gốc & Xác thực' : 'Provenance & Validation'}</span>
                 </div>
                 <p>
-                  Tray updated from A to B based on worker question from Minh. Verified against standard work by An (Team lead). Clearer photo of Tray B added.
+                  {isVi
+                    ? 'Khay được cập nhật từ A sang B dựa trên câu hỏi của Minh. Được xác minh theo quy trình chuẩn bởi An (Trưởng nhóm). Đã bổ sung ảnh chụp Khay B rõ nét.'
+                    : 'Tray updated from A to B based on worker question from Minh. Verified against standard work by An (Team lead). Clearer photo of Tray B added.'}
                 </p>
               </div>
             </div>
@@ -128,9 +144,11 @@ export const ReviewPublishScreen: React.FC = () => {
           <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-xs space-y-3">
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-extrabold text-slate-900">
-                Change log note
+                {isVi ? 'Ghi chú nhật ký thay đổi' : 'Change log note'}
               </h2>
-              <span className="text-[11px] text-slate-400">Auditable release history</span>
+              <span className="text-[11px] text-slate-400">
+                {isVi ? 'Lịch sử phát hành có thể kiểm toán' : 'Auditable release history'}
+              </span>
             </div>
             <textarea
               rows={3}
@@ -143,7 +161,7 @@ export const ReviewPublishScreen: React.FC = () => {
           {/* Card 3: Who will be notified */}
           <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-xs space-y-3">
             <h2 className="text-sm font-extrabold text-slate-900">
-              Who will be notified
+              {isVi ? 'Những ai sẽ nhận thông báo' : 'Who will be notified'}
             </h2>
 
             <div className="space-y-2.5 text-xs">
@@ -152,7 +170,7 @@ export const ReviewPublishScreen: React.FC = () => {
                 <div className="flex-1">
                   <span className="font-extrabold text-slate-900 block">Minh</span>
                   <span className="text-[11px] text-blue-600 font-medium">
-                    Asked question · will receive direct notification &amp; reply
+                    {isVi ? 'Đã đặt câu hỏi · sẽ nhận thông báo & phản hồi trực tiếp' : 'Asked question · will receive direct notification & reply'}
                   </span>
                 </div>
               </div>
@@ -163,9 +181,11 @@ export const ReviewPublishScreen: React.FC = () => {
                 </div>
                 <div>
                   <span className="font-extrabold text-slate-900 block">
-                    All Assembly Line A team members
+                    {isVi ? 'Tất cả thành viên chuyền lắp ráp A' : 'All Assembly Line A team members'}
                   </span>
-                  <span className="text-[11px] text-slate-400">12 team members</span>
+                  <span className="text-[11px] text-slate-400">
+                    {isVi ? '12 thành viên nhóm' : '12 team members'}
+                  </span>
                 </div>
               </div>
             </div>
@@ -181,11 +201,11 @@ export const ReviewPublishScreen: React.FC = () => {
                   ✓
                 </div>
                 <h3 className="font-extrabold text-sm text-slate-900">
-                  Ready to publish?
+                  {isVi ? 'Sẵn sàng xuất bản?' : 'Ready to publish?'}
                 </h3>
               </div>
               <p className="text-xs text-slate-600 leading-relaxed">
-                All checks passed. Instruction is ready to be published.
+                {isVi ? 'Tất cả kiểm tra đã thông qua. Hướng dẫn đã sẵn sàng xuất bản.' : 'All checks passed. Instruction is ready to be published.'}
               </p>
             </div>
 
@@ -193,19 +213,19 @@ export const ReviewPublishScreen: React.FC = () => {
             <div className="space-y-2 text-xs text-slate-700">
               <div className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-emerald-600 font-bold" />
-                <span>Step numbers and sequence verified</span>
+                <span>{isVi ? 'Số bước và trình tự đã được xác minh' : 'Step numbers and sequence verified'}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-emerald-600 font-bold" />
-                <span>Clear photos for each step</span>
+                <span>{isVi ? 'Hình ảnh rõ ràng cho từng bước' : 'Clear photos for each step'}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-emerald-600 font-bold" />
-                <span>Worker question addressed with reply</span>
+                <span>{isVi ? 'Câu hỏi của nhân viên đã được giải đáp kèm phản hồi' : 'Worker question addressed with reply'}</span>
               </div>
               <div className="flex items-center gap-2">
                 <Check className="w-4 h-4 text-emerald-600 font-bold" />
-                <span>No conflicting instructions</span>
+                <span>{isVi ? 'Không có xung đột với các chỉ dẫn khác' : 'No conflicting instructions'}</span>
               </div>
             </div>
 
@@ -219,7 +239,7 @@ export const ReviewPublishScreen: React.FC = () => {
                   className="mt-0.5 rounded text-blue-600"
                 />
                 <span className="font-medium text-slate-800">
-                  I checked the task details and references against the standard work.
+                  {isVi ? 'Tôi đã đối chiếu chi tiết nhiệm vụ và tài liệu tham chiếu với quy chuẩn làm việc.' : 'I checked the task details and references against the standard work.'}
                 </span>
               </label>
 
@@ -231,7 +251,7 @@ export const ReviewPublishScreen: React.FC = () => {
                   className="mt-0.5 rounded text-blue-600"
                 />
                 <span className="font-medium text-slate-800">
-                  I provided an accessible opportunity for Minh to ask or suggest.
+                  {isVi ? 'Tôi đã tạo cơ hội tiếp cận phù hợp để Minh có thể đặt câu hỏi hoặc đề xuất ý kiến.' : 'I provided an accessible opportunity for Minh to ask or suggest.'}
                 </span>
               </label>
             </div>
@@ -245,27 +265,27 @@ export const ReviewPublishScreen: React.FC = () => {
                 className="w-full py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-200 disabled:text-slate-400 disabled:cursor-not-allowed text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center justify-center gap-2"
               >
                 <Send className="w-4 h-4" />
-                <span>Publish instruction</span>
+                <span>{isVi ? 'Xuất bản hướng dẫn' : 'Publish instruction'}</span>
               </button>
 
               <button
                 onClick={() => setScreen('facilitator')}
                 className="w-full py-2 bg-white hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-semibold border border-slate-200 transition"
               >
-                Save as draft
+                {isVi ? 'Lưu bản nháp' : 'Save as draft'}
               </button>
 
               <button
                 onClick={() => setScreen('facilitator')}
                 className="w-full py-2 text-slate-400 hover:text-slate-600 rounded-xl text-xs font-medium transition"
               >
-                Cancel
+                {isVi ? 'Hủy' : 'Cancel'}
               </button>
             </div>
           </div>
 
           {/* Botanical Quote Corner */}
-          <BotanicalCorner phrase="Clear instructions, confident teams." />
+          <BotanicalCorner phrase={isVi ? 'Chỉ dẫn rõ ràng, đội ngũ tự tin.' : 'Clear instructions, confident teams.'} />
         </div>
       </div>
     </div>

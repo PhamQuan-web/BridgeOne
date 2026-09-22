@@ -4,6 +4,7 @@ import { translations } from './translations';
 
 interface LanguageContextType {
   language: SupportedLanguage;
+  isVi: boolean;
   setLanguage: (lang: SupportedLanguage) => void;
   t: (key: string, defaultText?: string) => string;
   languages: LanguageOption[];
@@ -40,6 +41,8 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
     }
   };
 
+  const isVi = language === 'vi';
+
   const t = (key: string, defaultText?: string): string => {
     const langDict = translations[language] || translations.vi;
     if (langDict[key]) {
@@ -59,6 +62,7 @@ export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }
     <LanguageContext.Provider
       value={{
         language,
+        isVi,
         setLanguage,
         t,
         languages: SUPPORTED_LANGUAGES,

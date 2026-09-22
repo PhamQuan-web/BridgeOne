@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useHandoff } from '../../context/HandoffContext';
+import { useLanguage } from '../../i18n/LanguageContext';
 import {
   FolderKanban,
   FileText,
@@ -17,6 +18,7 @@ import {
 
 export const ResourcesScreen: React.FC = () => {
   const { setScreen } = useHandoff();
+  const { isVi } = useLanguage();
   const [searchQuery, setSearchQuery] = useState('');
   const [filterTag, setFilterTag] = useState<string>('all');
 
@@ -24,62 +26,97 @@ export const ResourcesScreen: React.FC = () => {
     {
       id: 'SOP-INS-1042',
       code: 'SOP-INS-1042',
-      title: 'Pack Finished Assemblies (Assembly Line A)',
-      version: 'v2.0 (Updated to Tray B)',
-      category: 'Standard Work',
-      provenance: '✔ Verified by An · Provenance: Worker Question Handoff',
-      date: 'Today',
-      description: 'Step-by-step visual packing instructions for high-volume electrical units, updated with Tray B staging.',
+      title: isVi
+        ? 'Đóng gói các cụm lắp ráp hoàn thiện (Chuyền A)'
+        : 'Pack Finished Assemblies (Assembly Line A)',
+      version: isVi ? 'v2.0 (Đã cập nhật sang Khay B)' : 'v2.0 (Updated to Tray B)',
+      category: isVi ? 'Quy chuẩn làm việc' : 'Standard Work',
+      categoryKey: 'Standard Work',
+      provenance: isVi
+        ? '✔ Đã xác minh bởi An · Nguồn gốc: Bàn giao câu hỏi nhân viên'
+        : '✔ Verified by An · Provenance: Worker Question Handoff',
+      date: isVi ? 'Hôm nay' : 'Today',
+      description: isVi
+        ? 'Chỉ dẫn đóng gói trực quan từng bước cho cụm linh kiện điện tử sản lượng lớn, đã cập nhật vị trí xếp Khay B.'
+        : 'Step-by-step visual packing instructions for high-volume electrical units, updated with Tray B staging.',
       isGoldenFlow: true,
-      downloads: '142 views',
+      downloads: isVi ? '142 lượt xem' : '142 views',
     },
     {
       id: 'SOP-SAF-002',
       code: 'SOP-SAF-002',
-      title: 'Blind-Corner LED & Sightline Plant Floor Protocol',
-      version: 'v1.4 Official',
-      category: 'Safety & EHS',
-      provenance: 'Approved by Plant EHS Committee',
-      date: '15 Sep 2026',
-      description: 'Architectural Pillar 3 specification: Strobe patterns, forklift crossings, and zero-blindspot U-layouts.',
+      title: isVi
+        ? 'Quy trình đèn LED góc khuất & Tầm nhìn mặt bằng nhà xưởng'
+        : 'Blind-Corner LED & Sightline Plant Floor Protocol',
+      version: isVi ? 'v1.4 Chính thức' : 'v1.4 Official',
+      category: isVi ? 'An toàn & EHS' : 'Safety & EHS',
+      categoryKey: 'Safety & EHS',
+      provenance: isVi
+        ? 'Được phê duyệt bởi Ban An toàn & EHS Nhà máy'
+        : 'Approved by Plant EHS Committee',
+      date: isVi ? '15 Th09 2026' : '15 Sep 2026',
+      description: isVi
+        ? 'Quy chuẩn Trụ cột 3: Chế độ đèn chớp, giao lộ xe nâng và bố trí chuyền hình chữ U không góc khuất.'
+        : 'Architectural Pillar 3 specification: Strobe patterns, forklift crossings, and zero-blindspot U-layouts.',
       isGoldenFlow: false,
-      downloads: '89 views',
+      downloads: isVi ? '89 lượt xem' : '89 views',
     },
     {
       id: 'SOP-HR-001',
       code: 'SOP-HR-001',
-      title: 'Non-Verbal & Text-Based Inclusive Interview Protocol',
-      version: 'v1.1 Pilot',
-      category: 'HR & Recruitment',
-      provenance: 'ADC Hackathon Roundtable 2026',
-      date: '02 Sep 2026',
-      description: 'Stage 3 Brief solution: Standardized protocols for HR to conduct fair, barrier-free evaluations without oral guessing.',
+      title: isVi
+        ? 'Quy trình phỏng vấn hòa nhập phi ngôn ngữ & dựa trên văn bản'
+        : 'Non-Verbal & Text-Based Inclusive Interview Protocol',
+      version: isVi ? 'v1.1 Thử nghiệm' : 'v1.1 Pilot',
+      category: isVi ? 'Nhân sự & Tuyển dụng' : 'HR & Recruitment',
+      categoryKey: 'HR & Recruitment',
+      provenance: isVi
+        ? 'Bàn tròn Tọa đàm ADC Hackathon 2026'
+        : 'ADC Hackathon Roundtable 2026',
+      date: isVi ? '02 Th09 2026' : '02 Sep 2026',
+      description: isVi
+        ? 'Giải pháp đề bài Giai đoạn 3: Bộ quy chuẩn giúp bộ phận nhân sự đánh giá công bằng, không rào cản và không phải phỏng đoán bằng lời nói.'
+        : 'Stage 3 Brief solution: Standardized protocols for HR to conduct fair, barrier-free evaluations without oral guessing.',
       isGoldenFlow: false,
-      downloads: '64 views',
+      downloads: isVi ? '64 lượt xem' : '64 views',
     },
     {
       id: 'SOP-ACC-004',
       code: 'SOP-ACC-004',
-      title: 'Workplace Justice & Disciplinary Evidence Guidelines',
-      version: 'v2.1 Legal Approved',
-      category: 'Policy & Governance',
-      provenance: 'Labor Law & Inclusion Taskforce',
-      date: '20 Aug 2026',
-      description: 'Stage 4 Brief solution: Objective audit trails distinguishing instruction defects from deliberate misconduct.',
+      title: isVi
+        ? 'Hướng dẫn công bằng nơi làm việc & Bằng chứng quy trách nhiệm'
+        : 'Workplace Justice & Disciplinary Evidence Guidelines',
+      version: isVi ? 'v2.1 Đã phê duyệt pháp lý' : 'v2.1 Legal Approved',
+      category: isVi ? 'Chính sách & Quản trị' : 'Policy & Governance',
+      categoryKey: 'Policy & Governance',
+      provenance: isVi
+        ? 'Tổ công tác Pháp lý Lao động & Hòa nhập'
+        : 'Labor Law & Inclusion Taskforce',
+      date: isVi ? '20 Th08 2026' : '20 Aug 2026',
+      description: isVi
+        ? 'Giải pháp đề bài Giai đoạn 4: Dấu vết kiểm toán khách quan giúp phân biệt rõ lỗi thiếu chỉ dẫn và hành vi vi phạm cố ý.'
+        : 'Stage 4 Brief solution: Objective audit trails distinguishing instruction defects from deliberate misconduct.',
       isGoldenFlow: false,
-      downloads: '112 views',
+      downloads: isVi ? '112 lượt xem' : '112 views',
     },
     {
       id: 'TMPL-VIS-008',
       code: 'TMPL-VIS-008',
-      title: 'Universal Design 7-Principle Checklist for Shopfloor SOPs',
-      version: 'v3.0 Template',
-      category: 'Templates',
-      provenance: 'Universal Design Institute',
-      date: '10 Aug 2026',
-      description: 'Formatting checklist for creating visual instructions with 44px touch targets, zero auditory cues, and low cognitive fatigue.',
+      title: isVi
+        ? 'Bảng kiểm 7 Nguyên tắc Thiết kế Phổ quát cho SOP xưởng sản xuất'
+        : 'Universal Design 7-Principle Checklist for Shopfloor SOPs',
+      version: isVi ? 'v3.0 Biểu mẫu chuẩn' : 'v3.0 Template',
+      category: isVi ? 'Biểu mẫu chuẩn' : 'Templates',
+      categoryKey: 'Templates',
+      provenance: isVi
+        ? 'Viện Thiết kế Phổ quát'
+        : 'Universal Design Institute',
+      date: isVi ? '10 Th08 2026' : '10 Aug 2026',
+      description: isVi
+        ? 'Bảng kiểm định dạng tạo chỉ dẫn trực quan với vùng chạm tối thiểu 44px, không phụ thuộc tín hiệu âm thanh và giảm áp lực nhận thức.'
+        : 'Formatting checklist for creating visual instructions with 44px touch targets, zero auditory cues, and low cognitive fatigue.',
       isGoldenFlow: false,
-      downloads: '230 views',
+      downloads: isVi ? '230 lượt xem' : '230 views',
     },
   ];
 
@@ -88,7 +125,10 @@ export const ResourcesScreen: React.FC = () => {
       res.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       res.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
       res.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesTag = filterTag === 'all' || res.category.toLowerCase().includes(filterTag.toLowerCase());
+    const matchesTag =
+      filterTag === 'all' ||
+      res.categoryKey.toLowerCase() === filterTag.toLowerCase() ||
+      res.category.toLowerCase().includes(filterTag.toLowerCase());
     return matchesSearch && matchesTag;
   });
 
@@ -100,15 +140,19 @@ export const ResourcesScreen: React.FC = () => {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
-                SOP &amp; Policy Repository
+                {isVi ? 'Kho lưu trữ SOP & Chính sách' : 'SOP & Policy Repository'}
               </span>
-              <span className="text-xs text-slate-400 font-semibold">Audited &amp; Accessible</span>
+              <span className="text-xs text-slate-400 font-semibold">
+                {isVi ? 'Đã kiểm toán & Dễ tiếp cận' : 'Audited & Accessible'}
+              </span>
             </div>
             <h1 className="text-2xl font-extrabold text-slate-950 tracking-tight">
-              Standard Work &amp; Policy Resources
+              {isVi ? 'Quy chuẩn Làm việc & Tài nguyên Chính sách' : 'Standard Work & Policy Resources'}
             </h1>
             <p className="text-xs sm:text-sm text-slate-600">
-              Official operating standards, inclusive HR interview guidelines, and objective accountability frameworks.
+              {isVi
+                ? 'Các quy chuẩn vận hành chính thức, hướng dẫn phỏng vấn nhân sự hòa nhập và khung quy trách nhiệm khách quan.'
+                : 'Official operating standards, inclusive HR interview guidelines, and objective accountability frameworks.'}
             </p>
           </div>
 
@@ -118,7 +162,7 @@ export const ResourcesScreen: React.FC = () => {
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-2"
             >
               <Eye className="w-3.5 h-3.5" />
-              <span>View Published SOP (INS-1042)</span>
+              <span>{isVi ? 'Xem SOP đã xuất bản (INS-1042)' : 'View Published SOP (INS-1042)'}</span>
             </button>
           </div>
         </div>
@@ -132,23 +176,29 @@ export const ResourcesScreen: React.FC = () => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search standards by SOP code or keyword..."
+            placeholder={isVi ? 'Tìm kiếm quy chuẩn theo mã SOP hoặc từ khóa...' : 'Search standards by SOP code or keyword...'}
             className="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600"
           />
         </div>
 
         <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto text-xs">
-          {['all', 'Standard Work', 'Safety & EHS', 'HR & Recruitment', 'Policy & Governance'].map((tag) => (
+          {[
+            { id: 'all', label: isVi ? 'Tất cả tài nguyên' : 'All Resources' },
+            { id: 'Standard Work', label: isVi ? 'Quy chuẩn làm việc' : 'Standard Work' },
+            { id: 'Safety & EHS', label: isVi ? 'An toàn & EHS' : 'Safety & EHS' },
+            { id: 'HR & Recruitment', label: isVi ? 'Nhân sự & Tuyển dụng' : 'HR & Recruitment' },
+            { id: 'Policy & Governance', label: isVi ? 'Chính sách & Quản trị' : 'Policy & Governance' },
+          ].map((tag) => (
             <button
-              key={tag}
-              onClick={() => setFilterTag(tag)}
+              key={tag.id}
+              onClick={() => setFilterTag(tag.id)}
               className={`px-3 py-1.5 rounded-lg font-semibold transition shrink-0 ${
-                filterTag === tag
+                filterTag === tag.id
                   ? 'bg-slate-900 text-white shadow-2xs'
                   : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
               }`}
             >
-              {tag === 'all' ? 'All Resources' : tag}
+              {tag.label}
             </button>
           ))}
         </div>
@@ -201,12 +251,12 @@ export const ResourcesScreen: React.FC = () => {
                   className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl transition flex items-center gap-1.5 shadow-2xs"
                 >
                   <Eye className="w-3.5 h-3.5" />
-                  <span>Open SOP</span>
+                  <span>{isVi ? 'Mở SOP' : 'Open SOP'}</span>
                 </button>
               ) : (
-                <button className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition flex items-center gap-1.5">
+                <button className="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl transition flex items-center gap-1.5">
                   <Download className="w-3.5 h-3.5 text-slate-500" />
-                  <span>PDF Card</span>
+                  <span>{isVi ? 'Thẻ PDF' : 'PDF Card'}</span>
                 </button>
               )}
             </div>

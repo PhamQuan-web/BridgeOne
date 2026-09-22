@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useHandoff } from '../../context/HandoffContext';
+import { useLanguage } from '../../i18n/LanguageContext';
 import {
   AlertTriangle,
   ArrowRight,
@@ -17,6 +18,7 @@ import {
 
 export const BlindCornerAlertModal: React.FC = () => {
   const { state, dismissSafetyAlert } = useHandoff();
+  const { t, isVi } = useLanguage();
   const [countdown, setCountdown] = useState<number>(3.0);
   const [isDismissedSafe, setIsDismissedSafe] = useState(false);
 
@@ -69,12 +71,12 @@ export const BlindCornerAlertModal: React.FC = () => {
             </span>
             <div>
               <span className="text-[10px] font-extrabold uppercase tracking-widest text-rose-200">
-                MODULE 2 · CẢNH BÁO AN TOÀN PHI ÂM THANH
+                {t('safety.module_title')}
               </span>
               <h2 id="blind-corner-title" className="text-base sm:text-lg font-black tracking-tight flex items-center gap-2">
-                <span>PHÁT HIỆN VẬT CẢN GÓC MÙ</span>
+                <span>{t('safety.hazard_detected')}</span>
                 <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-white text-rose-700">
-                  CÒN {countdown.toFixed(1)}s
+                  {t('safety.remaining')} {countdown.toFixed(1)}s
                 </span>
               </h2>
             </div>
@@ -84,7 +86,7 @@ export const BlindCornerAlertModal: React.FC = () => {
             type="button"
             onClick={dismissSafetyAlert}
             className="p-1 rounded-lg text-rose-200 hover:text-white hover:bg-white/10 transition"
-            title="Tắt cảnh báo"
+            title={t('safety.close')}
           >
             <X className="w-5 h-5" />
           </button>
@@ -106,17 +108,22 @@ export const BlindCornerAlertModal: React.FC = () => {
               </div>
               <div className="space-y-0.5 text-center sm:text-left">
                 <span className="text-[11px] font-extrabold text-rose-700 uppercase tracking-wider block">
-                  HƯỚNG TIẾP CẬN NGUY HIỂM
+                  {t('safety.approach_direction')}
                 </span>
                 <h3 className="text-xl sm:text-2xl font-black text-rose-900 tracking-tight">
                   {direction === 'RIGHT'
-                    ? 'TIẾP CẬN TỪ BÊN PHẢI ➡️'
+                    ? t('safety.dir_right')
                     : direction === 'LEFT'
-                    ? 'TIẾP CẬN TỪ BÊN TRÁI ⬅️'
-                    : 'TIẾP CẬN TỪ PHÍA SAU LƯNG ⬇️'}
+                    ? t('safety.dir_left')
+                    : t('safety.dir_behind')}
                 </h3>
                 <p className="text-xs text-rose-800 font-semibold">
-                  Đối tượng: <strong className="font-extrabold">{hazardType === 'forklift' ? 'Xe nâng hàng' : 'Xe đẩy hàng chuyển phôi'}</strong>
+                  {isVi ? 'Đối tượng: ' : 'Hazard Target: '}
+                  <strong className="font-extrabold">
+                    {hazardType === 'forklift'
+                      ? (isVi ? 'Xe nâng hàng' : 'Forklift')
+                      : (isVi ? 'Xe đẩy hàng chuyển phôi' : 'Component Trolley')}
+                  </strong>
                 </p>
               </div>
             </div>
@@ -125,9 +132,11 @@ export const BlindCornerAlertModal: React.FC = () => {
             <div className="px-3 py-2 rounded-xl bg-white border border-rose-200 text-center shrink-0 shadow-2xs">
               <div className="flex items-center justify-center gap-1.5 text-rose-700 font-extrabold text-xs">
                 <Vibrate className="w-4 h-4 animate-ping" />
-                <span>RUNG HAPTIC</span>
+                <span>{isVi ? 'RUNG HAPTIC' : 'HAPTIC ALERT'}</span>
               </div>
-              <span className="text-[10px] text-slate-500 font-medium">Báo rung điện thoại</span>
+              <span className="text-[10px] text-slate-500 font-medium">
+                {isVi ? 'Báo rung điện thoại' : 'Phone vibration active'}
+              </span>
             </div>
           </div>
 
@@ -138,7 +147,7 @@ export const BlindCornerAlertModal: React.FC = () => {
               {/* Simulated camera grid & label */}
               <div className="absolute top-2 left-2 flex items-center gap-1.5 px-2 py-0.5 rounded bg-black/60 text-white text-[10px] font-mono">
                 <span className="w-2 h-2 rounded-full bg-red-500 animate-ping" />
-                <span>CAM-BC02 · Chuyền A</span>
+                <span>CAM-BC02 · {isVi ? 'Chuyền A' : 'Line A'}</span>
               </div>
               <div className="absolute top-2 right-2 text-[10px] text-slate-400 font-mono">
                 {timestamp}
@@ -150,11 +159,15 @@ export const BlindCornerAlertModal: React.FC = () => {
                 <span className="text-[10px] font-bold text-white bg-rose-600 px-1.5 py-0.5 rounded block">
                   {hazardType === 'forklift' ? 'Forklift Approaching' : 'Trolley 94%'}
                 </span>
-                <span className="text-[9px] font-mono text-rose-200">Khoảng cách: ~ 3.5m</span>
+                <span className="text-[9px] font-mono text-rose-200">
+                  {isVi ? 'Khoảng cách: ~ 3.5m' : 'Distance: ~ 3.5m'}
+                </span>
               </div>
 
               <div className="absolute bottom-2 left-2 text-[9px] text-slate-400">
-                Phát hiện không nhận diện khuôn mặt (Bảo mật riêng tư)
+                {isVi
+                  ? 'Phát hiện không nhận diện khuôn mặt (Bảo mật riêng tư)'
+                  : 'Privacy-safe edge AI (No facial recognition)'}
               </div>
             </div>
 
@@ -164,7 +177,7 @@ export const BlindCornerAlertModal: React.FC = () => {
                 <div className="flex items-center justify-between text-[11px] font-bold text-slate-700">
                   <span className="flex items-center gap-1.5">
                     <Clock className="w-3.5 h-3.5 text-blue-600" />
-                    <span>Thời gian phản xạ an toàn:</span>
+                    <span>{isVi ? 'Thời gian phản xạ an toàn:' : 'Safe reaction lead time:'}</span>
                   </span>
                   <span className="font-mono text-rose-600 font-extrabold">{countdown.toFixed(1)}s / 3.0s</span>
                 </div>
@@ -180,10 +193,12 @@ export const BlindCornerAlertModal: React.FC = () => {
               <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 space-y-1.5">
                 <div className="flex items-center gap-1.5 text-slate-900 font-bold text-[11px]">
                   <MapPin className="w-3.5 h-3.5 text-slate-500" />
-                  <span>Vị trí: {location}</span>
+                  <span>{isVi ? 'Vị trí: ' : 'Location: '}{location}</span>
                 </div>
                 <p className="text-[11px] text-slate-600 leading-relaxed">
-                  Hệ thống hỗ trợ thị giác phi âm thanh, thay thế cho áo vest cồng kềnh. Thông báo trực tiếp qua điện thoại công nhân.
+                  {isVi
+                    ? 'Hệ thống hỗ trợ thị giác phi âm thanh, thay thế cho áo vest cồng kềnh. Thông báo trực tiếp qua điện thoại công nhân.'
+                    : 'Non-auditory visual hazard alert, eliminating bulky vibrating vests. Notifies worker directly via phone screen.'}
                 </p>
               </div>
             </div>
@@ -198,7 +213,11 @@ export const BlindCornerAlertModal: React.FC = () => {
               className="w-full sm:flex-1 py-3.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-2xl text-sm font-extrabold flex items-center justify-center gap-2 transition shadow-lg shadow-emerald-600/30"
             >
               <CheckCircle2 className="w-5 h-5" />
-              <span>{isDismissedSafe ? 'ĐÃ GHI NHẬN AN TOÀN!' : 'XÁC NHẬN: ĐÃ NÉ TRÁNH AN TOÀN'}</span>
+              <span>
+                {isDismissedSafe
+                  ? (isVi ? 'ĐÃ GHI NHẬN AN TOÀN!' : 'SAFETY LOG RECORDED!')
+                  : (isVi ? 'XÁC NHẬN: ĐÃ NÉ TRÁNH AN TOÀN' : 'CONFIRM: MOVED TO SAFETY')}
+              </span>
             </button>
 
             <button
@@ -206,14 +225,18 @@ export const BlindCornerAlertModal: React.FC = () => {
               onClick={dismissSafetyAlert}
               className="w-full sm:w-auto px-5 py-3.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-2xl text-xs font-bold transition"
             >
-              Đóng cảnh báo
+              {isVi ? 'Đóng cảnh báo' : 'Dismiss'}
             </button>
           </div>
 
           {/* Universal Design Compliance Note */}
           <div className="text-[10px] text-slate-400 text-center flex items-center justify-center gap-2 pt-1 border-t border-slate-100">
             <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Chuẩn Nguyên tắc 4: Thông tin dễ cảm nhận · Nguyên tắc 5: An toàn trước sự cố</span>
+            <span>
+              {isVi
+                ? 'Chuẩn Nguyên tắc 4: Thông tin dễ cảm nhận · Nguyên tắc 5: An toàn trước sự cố'
+                : 'Universal Design Principle 4: Perceptible Info · Principle 5: Tolerance for Error'}
+            </span>
           </div>
         </div>
       </div>

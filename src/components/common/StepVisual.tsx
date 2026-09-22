@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLanguage } from '../../i18n/LanguageContext';
 
 interface StepVisualProps {
   type: 'inspect' | 'place_tray' | 'label' | 'rack';
@@ -11,6 +12,8 @@ export const StepVisual: React.FC<StepVisualProps> = ({
   destination = 'Tray B',
   isUpdated = false,
 }) => {
+  const { isVi } = useLanguage();
+
   switch (type) {
     case 'inspect':
       return (
@@ -44,7 +47,7 @@ export const StepVisual: React.FC<StepVisualProps> = ({
             </g>
           </svg>
           <span className="absolute bottom-2 right-2.5 px-2 py-0.5 text-[11px] font-medium bg-white/90 backdrop-blur-xs text-slate-700 rounded-md border border-slate-200">
-            Check integrity &amp; 0 defects
+            {isVi ? 'Kiểm tra tính toàn vẹn & không lỗi' : 'Check integrity & 0 defects'}
           </span>
         </div>
       );
@@ -95,12 +98,12 @@ export const StepVisual: React.FC<StepVisualProps> = ({
           <div className="absolute top-2.5 right-2.5 flex items-center gap-1.5">
             {isUpdated && (
               <span className="px-2 py-0.5 text-[11px] font-semibold bg-emerald-100 text-emerald-800 rounded-full border border-emerald-300">
-                Updated to {destination}
+                {isVi ? `Đã cập nhật sang ${destination}` : `Updated to ${destination}`}
               </span>
             )}
           </div>
           <span className="absolute bottom-2 left-2.5 px-2 py-0.5 text-[11px] font-medium bg-white/90 backdrop-blur-xs text-slate-700 rounded-md border border-slate-200">
-            Capacity: 2 units
+            {isVi ? 'Sức chứa: 2 cụm' : 'Capacity: 2 units'}
           </span>
         </div>
       );
@@ -118,7 +121,7 @@ export const StepVisual: React.FC<StepVisualProps> = ({
             <g transform="translate(118, 34)">
               <rect x="0" y="0" width="72" height="42" rx="4" fill="#059669" stroke="#10B981" strokeWidth="1.5" />
               <text x="36" y="16" textAnchor="middle" fill="white" fontSize="9" fontWeight="800" letterSpacing="0.5">
-                COMPLETED
+                {isVi ? 'HOÀN TẤT' : 'COMPLETED'}
               </text>
               <line x1="8" y1="22" x2="64" y2="22" stroke="white" strokeWidth="0.75" strokeOpacity="0.5" />
               {/* Barcode lines */}
@@ -138,7 +141,7 @@ export const StepVisual: React.FC<StepVisualProps> = ({
             <path d="M174 68L177 71L183 65" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
           </svg>
           <span className="absolute bottom-2 right-2.5 px-2 py-0.5 text-[11px] font-medium bg-white/90 backdrop-blur-xs text-slate-700 rounded-md border border-slate-200">
-            Adhere green QA label on top-right
+            {isVi ? 'Dán tem QA xanh lá vào góc trên bên phải' : 'Adhere green QA label on top-right'}
           </span>
         </div>
       );
@@ -176,7 +179,7 @@ export const StepVisual: React.FC<StepVisualProps> = ({
             </text>
           </svg>
           <span className="absolute bottom-2 right-2.5 px-2 py-0.5 text-[11px] font-medium bg-white/90 backdrop-blur-xs text-slate-700 rounded-md border border-slate-200">
-            Assembly Line A · Staging Slot 4
+            {isVi ? 'Chuyền lắp ráp A · Vị trí đệm số 4' : 'Assembly Line A · Staging Slot 4'}
           </span>
         </div>
       );

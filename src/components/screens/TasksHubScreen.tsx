@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useHandoff } from '../../context/HandoffContext';
+import { useLanguage } from '../../i18n/LanguageContext';
 import { MinhAvatar, AnAvatar } from '../common/BrandGraphics';
 import {
   Layers,
@@ -20,6 +21,7 @@ import {
 
 export const TasksHubScreen: React.FC = () => {
   const { state, setScreen, selectStep } = useHandoff();
+  const { isVi } = useLanguage();
   const isFacilitator = state.activePersona === 'facilitator';
   const [filterState, setFilterState] = useState<'all' | 'active' | 'review' | 'completed'>('all');
   const [searchQuery, setSearchQuery] = useState('');
@@ -29,25 +31,25 @@ export const TasksHubScreen: React.FC = () => {
     switch (state.lifecycleStage) {
       case 'worker_sent':
         return {
-          label: 'Needs Clarification (Khay A)',
+          label: isVi ? 'Cần làm rõ (Khay A)' : 'Needs Clarification (Tray A)',
           badgeColor: 'bg-rose-100 text-rose-800 border-rose-300',
           dotColor: 'bg-rose-500 animate-pulse',
         };
       case 'facilitator_replied':
         return {
-          label: 'Updated to Khay B · Ready to resume',
+          label: isVi ? 'Đã cập nhật sang Khay B · Sẵn sàng tiếp tục' : 'Updated to Tray B · Ready to resume',
           badgeColor: 'bg-emerald-100 text-emerald-800 border-emerald-300',
           dotColor: 'bg-emerald-500',
         };
       case 'published_v1':
         return {
-          label: 'Published Official v1.0',
+          label: isVi ? 'Đã xuất bản chính thức v1.0' : 'Published Official v1.0',
           badgeColor: 'bg-blue-100 text-blue-800 border-blue-300',
           dotColor: 'bg-blue-500',
         };
       default:
         return {
-          label: 'In Progress (Active Shift)',
+          label: isVi ? 'Đang thực hiện (Ca trực hoạt động)' : 'In Progress (Active Shift)',
           badgeColor: 'bg-amber-100 text-amber-800 border-amber-300',
           dotColor: 'bg-amber-500',
         };
@@ -57,16 +59,20 @@ export const TasksHubScreen: React.FC = () => {
   const taskList = [
     {
       id: state.taskId,
-      title: state.taskTitle,
-      line: state.workArea,
-      assignee: 'Minh (Chuyên viên trạm)',
+      title: isVi
+        ? state.taskTitle
+        : (state.taskTitle === 'Lắp ráp cụm dây cáp tín hiệu' ? 'Signal Cable Harness Assembly' : state.taskTitle),
+      line: isVi
+        ? state.workArea
+        : (state.workArea === 'Chuyền lắp ráp A · Trạm 03' ? 'Assembly Line A · Station 03' : state.workArea),
+      assignee: isVi ? 'Minh (Chuyên viên trạm)' : 'Minh (Station Specialist)',
       stepsCount: state.steps.length,
       currentStep: state.isDestinationUpdated
-        ? `Đích mới: ${state.destination}`
-        : `Bước 2: ${state.steps[1]?.title || 'Đặt vào vị trí'}`,
-      category: 'Quy trình chuẩn Universal SOP',
-      priority: 'Nhiệm vụ ưu tiên',
-      estimatedTime: state.estimatedDuration,
+        ? (isVi ? `Đích mới: ${state.destination}` : `New destination: ${state.destination}`)
+        : (isVi ? `Bước 2: ${state.steps[1]?.title || 'Đặt vào vị trí'}` : `Step 2: ${state.steps[1]?.title || 'Place in location'}`),
+      category: isVi ? 'Quy trình chuẩn Universal SOP' : 'Universal SOP Standard Work',
+      priority: isVi ? 'Nhiệm vụ ưu tiên' : 'Priority Task',
+      estimatedTime: isVi ? state.estimatedDuration : state.estimatedDuration.replace('phút', 'mins'),
       progress: state.lifecycleStage === 'published_v1' ? 100 : 66,
       status: ins1042Status,
       isGolden: true,
@@ -74,17 +80,17 @@ export const TasksHubScreen: React.FC = () => {
     },
     {
       id: 'INS-1039',
-      title: 'Pre-flight Wire Harness Solder Inspection',
-      line: 'Assembly Line A · Station 02',
-      assignee: 'Minh & Lan (QC)',
+      title: isVi ? 'Kiểm tra mối hàn bó dây tín hiệu trước bay' : 'Pre-flight Wire Harness Solder Inspection',
+      line: isVi ? 'Chuyền lắp ráp A · Trạm 02' : 'Assembly Line A · Station 02',
+      assignee: isVi ? 'Minh & Lan (KCS)' : 'Minh & Lan (QC)',
       stepsCount: 4,
-      currentStep: 'Step 4: Magnifier Continuity Check',
-      category: 'Quality Control',
-      priority: 'Standard',
-      estimatedTime: '30 mins',
+      currentStep: isVi ? 'Bước 4: Kiểm tra độ thông mạch bằng kính lúp' : 'Step 4: Magnifier Continuity Check',
+      category: isVi ? 'Kiểm soát chất lượng' : 'Quality Control',
+      priority: isVi ? 'Tiêu chuẩn' : 'Standard',
+      estimatedTime: isVi ? '30 phút' : '30 mins',
       progress: 100,
       status: {
-        label: 'Completed (100% Quality Pass)',
+        label: isVi ? 'Đã hoàn tất (Đạt 100% chất lượng)' : 'Completed (100% Quality Pass)',
         badgeColor: 'bg-slate-100 text-slate-700 border-slate-300',
         dotColor: 'bg-slate-400',
       },
@@ -93,17 +99,17 @@ export const TasksHubScreen: React.FC = () => {
     },
     {
       id: 'INS-1045',
-      title: 'Visual Labeling & Barcode Verification',
-      line: 'Assembly Line A · Station 05',
+      title: isVi ? 'Dán nhãn trực quan & Xác minh mã vạch' : 'Visual Labeling & Barcode Verification',
+      line: isVi ? 'Chuyền lắp ráp A · Trạm 05' : 'Assembly Line A · Station 05',
       assignee: 'Minh',
       stepsCount: 2,
-      currentStep: 'Waiting for INS-1042 batch release',
-      category: 'Dispatch Logistics',
-      priority: 'Scheduled',
-      estimatedTime: '20 mins',
+      currentStep: isVi ? 'Chờ phát hành lô INS-1042' : 'Waiting for INS-1042 batch release',
+      category: isVi ? 'Hậu cần xuất xưởng' : 'Dispatch Logistics',
+      priority: isVi ? 'Theo lịch trình' : 'Scheduled',
+      estimatedTime: isVi ? '20 phút' : '20 mins',
       progress: 0,
       status: {
-        label: 'Queued (Next in Line)',
+        label: isVi ? 'Xếp hàng (Kế tiếp trong chuyền)' : 'Queued (Next in Line)',
         badgeColor: 'bg-indigo-50 text-indigo-700 border-indigo-200',
         dotColor: 'bg-indigo-400',
       },
@@ -112,17 +118,17 @@ export const TasksHubScreen: React.FC = () => {
     },
     {
       id: 'SOP-SAF-002',
-      title: 'Weekly Blind-Corner LED Beacon Sensor Test',
-      line: 'Plant Floor Safety System',
-      assignee: 'Hùng & An (Lead)',
+      title: isVi ? 'Kiểm tra định kỳ hàng tuần cảm biến đèn LED góc khuất' : 'Weekly Blind-Corner LED Beacon Sensor Test',
+      line: isVi ? 'Hệ thống an toàn mặt bằng xưởng' : 'Plant Floor Safety System',
+      assignee: isVi ? 'Hùng & An (Trưởng nhóm)' : 'Hùng & An (Lead)',
       stepsCount: 5,
-      currentStep: 'Step 3: Strobe luminosity calibration',
-      category: 'Safety & EHS',
-      priority: 'Routine',
-      estimatedTime: '15 mins',
+      currentStep: isVi ? 'Bước 3: Hiệu chuẩn cường độ sáng đèn chớp' : 'Step 3: Strobe luminosity calibration',
+      category: isVi ? 'An toàn & EHS' : 'Safety & EHS',
+      priority: isVi ? 'Định kỳ' : 'Routine',
+      estimatedTime: isVi ? '15 phút' : '15 mins',
       progress: 60,
       status: {
-        label: 'In Review by Lead',
+        label: isVi ? 'Đang được Trưởng nhóm rà soát' : 'In Review by Lead',
         badgeColor: 'bg-cyan-50 text-cyan-800 border-cyan-200',
         dotColor: 'bg-cyan-500',
       },
@@ -150,15 +156,19 @@ export const TasksHubScreen: React.FC = () => {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
-                Shift Tasks Hub
+                {isVi ? 'Trung tâm nhiệm vụ ca' : 'Shift Tasks Hub'}
               </span>
-              <span className="text-xs text-slate-400 font-semibold">Assembly Line A · Shift 1</span>
+              <span className="text-xs text-slate-400 font-semibold">
+                {isVi ? 'Chuyền lắp ráp A · Ca 1' : 'Assembly Line A · Shift 1'}
+              </span>
             </div>
             <h1 className="text-2xl font-extrabold text-slate-950 tracking-tight">
-              Assigned Tasks &amp; SOP Instructions
+              {isVi ? 'Nhiệm vụ được giao & Chỉ dẫn SOP' : 'Assigned Tasks & SOP Instructions'}
             </h1>
             <p className="text-xs sm:text-sm text-slate-600">
-              Clear visual instruction cards, real-time status flags, and step-level clarification tracking for each assigned task.
+              {isVi
+                ? 'Thẻ chỉ dẫn trực quan rõ nét, cờ trạng thái thời gian thực và theo dõi làm rõ từng bước thao tác.'
+                : 'Clear visual instruction cards, real-time status flags, and step-level clarification tracking for each assigned task.'}
             </p>
           </div>
 
@@ -171,7 +181,7 @@ export const TasksHubScreen: React.FC = () => {
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-2"
             >
               <Zap className="w-3.5 h-3.5" />
-              <span>Resume Active Task (INS-1042)</span>
+              <span>{isVi ? 'Tiếp tục nhiệm vụ đang làm (INS-1042)' : 'Resume Active Task (INS-1042)'}</span>
             </button>
           </div>
         </div>
@@ -185,17 +195,17 @@ export const TasksHubScreen: React.FC = () => {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search task by ID, name or category..."
+            placeholder={isVi ? 'Tìm nhiệm vụ theo mã, tên hoặc danh mục...' : 'Search task by ID, name or category...'}
             className="w-full pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-200 rounded-xl text-xs placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600"
           />
         </div>
 
         <div className="flex items-center gap-1.5 overflow-x-auto w-full sm:w-auto text-xs">
           {[
-            { id: 'all', label: 'All Tasks' },
-            { id: 'active', label: 'In Progress' },
-            { id: 'review', label: 'Needs Clarification' },
-            { id: 'completed', label: 'Completed' },
+            { id: 'all', label: isVi ? 'Tất cả nhiệm vụ' : 'All Tasks' },
+            { id: 'active', label: isVi ? 'Đang thực hiện' : 'In Progress' },
+            { id: 'review', label: isVi ? 'Cần làm rõ' : 'Needs Clarification' },
+            { id: 'completed', label: isVi ? 'Đã hoàn tất' : 'Completed' },
           ].map((tab) => (
             <button
               key={tab.id}
@@ -240,7 +250,7 @@ export const TasksHubScreen: React.FC = () => {
                   </span>
                   {task.isGolden && (
                     <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-blue-100 text-blue-900 border border-blue-300">
-                      ★ Trạm trọng điểm ca trực
+                      {isVi ? '★ Trạm trọng điểm ca trực' : '★ Shift Focus Station'}
                     </span>
                   )}
                 </div>
@@ -251,15 +261,15 @@ export const TasksHubScreen: React.FC = () => {
                   </h3>
                   <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-600 mt-1">
                     <span>
-                      <strong className="text-slate-700">Assignee:</strong> {task.assignee}
+                      <strong className="text-slate-700">{isVi ? 'Người thực hiện:' : 'Assignee:'}</strong> {task.assignee}
                     </span>
                     <span>•</span>
                     <span>
-                      <strong className="text-slate-700">Current:</strong> {task.currentStep}
+                      <strong className="text-slate-700">{isVi ? 'Hiện tại:' : 'Current:'}</strong> {task.currentStep}
                     </span>
                     <span>•</span>
                     <span>
-                      <strong className="text-slate-700">Est. Time:</strong> {task.estimatedTime}
+                      <strong className="text-slate-700">{isVi ? 'Thời gian ước tính:' : 'Est. Time:'}</strong> {task.estimatedTime}
                     </span>
                   </div>
                 </div>
@@ -267,8 +277,8 @@ export const TasksHubScreen: React.FC = () => {
                 {/* Progress bar */}
                 <div className="pt-2 max-w-md">
                   <div className="flex items-center justify-between text-[11px] text-slate-500 mb-1">
-                    <span>Progress: {task.progress}%</span>
-                    <span>{task.stepsCount} visual steps</span>
+                    <span>{isVi ? `Tiến độ: ${task.progress}%` : `Progress: ${task.progress}%`}</span>
+                    <span>{isVi ? `${task.stepsCount} bước trực quan` : `${task.stepsCount} visual steps`}</span>
                   </div>
                   <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
                     <div
@@ -296,7 +306,7 @@ export const TasksHubScreen: React.FC = () => {
                       }}
                       className="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-2"
                     >
-                      <span>Open Task Workstation</span>
+                      <span>{isVi ? 'Mở trạm làm việc' : 'Open Task Workstation'}</span>
                       <ArrowRight className="w-3.5 h-3.5" />
                     </button>
                     {isFacilitator && (
@@ -305,7 +315,7 @@ export const TasksHubScreen: React.FC = () => {
                         className="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold text-xs rounded-xl transition flex items-center gap-1.5"
                       >
                         <Eye className="w-3.5 h-3.5 text-slate-500" />
-                        <span>Lead Workspace</span>
+                        <span>{isVi ? 'Khu vực Trưởng nhóm' : 'Lead Workspace'}</span>
                       </button>
                     )}
                   </>
@@ -314,7 +324,7 @@ export const TasksHubScreen: React.FC = () => {
                     disabled
                     className="px-4 py-2.5 bg-slate-100 text-slate-400 font-bold text-xs rounded-xl cursor-not-allowed flex items-center gap-1.5"
                   >
-                    <span>Inspect Log</span>
+                    <span>{isVi ? 'Xem nhật ký' : 'Inspect Log'}</span>
                   </button>
                 )}
               </div>

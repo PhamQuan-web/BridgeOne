@@ -1,44 +1,43 @@
 import React from 'react';
 import { useLanguage } from '../../i18n/LanguageContext';
 
-// Infinity logo with royal blue and cyan gradients
-export const CungNhipLogo: React.FC<{ className?: string }> = ({ className = '' }) => {
+// Official BridgeOne Logo (Handshake Bridge forming numeral 1)
+export const CungNhipLogo: React.FC<{ className?: string; compact?: boolean }> = ({
+  className = '',
+  compact = false,
+}) => {
   const { t } = useLanguage();
+
+  if (compact) {
+    return (
+      <div className={`flex items-center justify-center ${className}`}>
+        <img
+          src="/bridgeone-logo.png"
+          alt="BridgeOne"
+          className="h-12 w-12 object-contain rounded-xl bg-white p-0.5 border border-slate-200/90 shadow-2xs"
+        />
+      </div>
+    );
+  }
+
   return (
-    <div className={`flex items-center gap-3 ${className}`}>
-      <svg className="w-10 h-7 shrink-0" viewBox="0 0 56 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <linearGradient id="logo-blue-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#1E40AF" />
-            <stop offset="100%" stopColor="#2563EB" />
-          </linearGradient>
-          <linearGradient id="logo-cyan-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-            <stop offset="0%" stopColor="#2563EB" />
-            <stop offset="100%" stopColor="#06B6D4" />
-          </linearGradient>
-        </defs>
-        {/* Left Loop */}
-        <path
-          d="M17 6C10.9249 6 6 10.4772 6 16C6 21.5228 10.9249 26 17 26C23.0751 26 27.5 19.5 32 14.5C36.5 9.5 40.9249 6 47 6C53.0751 6 58 10.4772 58 16"
-          stroke="url(#logo-blue-gradient)"
-          strokeWidth="6"
-          strokeLinecap="round"
-        />
-        {/* Right Loop */}
-        <path
-          d="M39 26C45.0751 26 50 21.5228 50 16C50 10.4772 45.0751 6 39 6C32.9249 6 28.5 12.5 24 17.5C19.5 22.5 15.0751 26 9 26"
-          stroke="url(#logo-cyan-gradient)"
-          strokeWidth="6"
-          strokeLinecap="round"
-        />
-      </svg>
+    <div className={`flex items-start gap-3.5 ${className}`}>
+      <img
+        src="/bridgeone-logo.png"
+        alt="BridgeOne"
+        className="h-14 w-auto object-contain shrink-0 drop-shadow-2xs mt-0.5"
+      />
       <div className="flex flex-col min-w-0">
-        <span className="font-extrabold text-slate-950 text-xl tracking-tight leading-tight block">
-          BridgeOne
-        </span>
-        <span className="text-[11px] text-slate-500 font-medium tracking-tight leading-snug line-clamp-2">
-          {t('brand.slogan', 'Công việc rõ ràng. Đồng hành vững bền.')}
-        </span>
+        <div className="flex items-center leading-none">
+          <span className="font-black text-[#1E40AF] text-2xl tracking-tight">Bridge</span>
+          <span className="font-black text-[#16A34A] text-2xl tracking-tight">One</span>
+        </div>
+        <div className="text-[10px] font-extrabold text-blue-900 tracking-wider uppercase mt-1 leading-snug">
+          {t('brand.slogan', 'Hòa nhập · Phát triển · Thăng tiến')}
+        </div>
+        <div className="text-[11px] text-slate-500 font-semibold tracking-tight leading-snug mt-0.5">
+          {t('brand.mission', 'Công việc rõ ràng, đồng hành vững bền.')}
+        </div>
       </div>
     </div>
   );
@@ -49,9 +48,13 @@ export const WorkerIllustration: React.FC<{
   phrase?: string;
   subphrase?: string;
 }> = ({
-  phrase = 'Clear communication builds stronger teams.',
-  subphrase = 'You make a difference. Inclusive workplaces create safer, stronger opportunities for everyone.',
+  phrase,
+  subphrase,
 }) => {
+  const { isVi } = useLanguage();
+  const displayPhrase = phrase || (isVi ? 'Giao tiếp rõ ràng tạo nên đội ngũ vững mạnh.' : 'Clear communication builds stronger teams.');
+  const displaySubphrase = subphrase || (isVi ? 'Mỗi đóng góp của bạn đều có ý nghĩa. Môi trường hòa nhập mở ra cơ hội an toàn hơn cho mọi người.' : 'You make a difference. Inclusive workplaces create safer, stronger opportunities for everyone.');
+
   return (
     <div className="pt-2 select-none overflow-visible">
       {/* Cartoon boy with thumbs up */}
@@ -59,7 +62,7 @@ export const WorkerIllustration: React.FC<{
         {/* Floating handwritten slogan with green tick marks */}
         <div className="relative self-end mr-3 mb-0 z-10 max-w-[170px] text-right transform rotate-[-3deg]">
           <span className="font-handwriting text-blue-600 text-[18px] sm:text-[19px] font-bold leading-tight block drop-shadow-2xs">
-            {phrase}
+            {displayPhrase}
           </span>
           {/* Green accent ticks */}
           <div className="absolute -top-2.5 -right-1 text-emerald-500 flex gap-0.5">
@@ -145,10 +148,10 @@ export const WorkerIllustration: React.FC<{
         </div>
         <div className="space-y-0.5">
           <span className="font-bold text-xs text-emerald-950 block">
-            You make a difference.
+            {isVi ? 'Bạn tạo nên sự khác biệt.' : 'You make a difference.'}
           </span>
           <p className="text-[11px] text-emerald-800 leading-snug">
-            {subphrase}
+            {displaySubphrase}
           </p>
         </div>
       </div>
@@ -158,8 +161,10 @@ export const WorkerIllustration: React.FC<{
 
 // Bottom Right Botanical Hill with dual leaves and cursive text
 export const BotanicalCorner: React.FC<{ phrase?: string }> = ({
-  phrase = 'More inclusion. Brighter tomorrows.',
+  phrase,
 }) => {
+  const { isVi } = useLanguage();
+  const displayPhrase = phrase || (isVi ? 'Hòa nhập hơn. Tương lai tươi sáng hơn.' : 'More inclusion. Brighter tomorrows.');
   return (
     <div className="relative w-full h-36 overflow-hidden select-none pointer-events-none">
       <svg
@@ -209,7 +214,7 @@ export const BotanicalCorner: React.FC<{ phrase?: string }> = ({
       {/* Cursive handwritten phrase */}
       <div className="absolute bottom-5 right-6 z-10 text-right transform rotate-[-3deg]">
         <span className="font-handwriting text-blue-800 text-[20px] sm:text-[22px] font-bold tracking-wide drop-shadow-2xs">
-          {phrase}
+          {displayPhrase}
         </span>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useHandoff } from '../../context/HandoffContext';
+import { useLanguage } from '../../i18n/LanguageContext';
 import { AnAvatar, MinhAvatar } from '../common/BrandGraphics';
 import {
   MessageSquare,
@@ -17,10 +18,12 @@ import {
   MicOff,
   AlertCircle,
   ChevronRight,
+  Volume2,
 } from 'lucide-react';
 
 export const MessagesScreen: React.FC = () => {
   const { state, setScreen, setGoldenFlowState, startSpeechRecording, stopSpeechRecording } = useHandoff();
+  const { isVi } = useLanguage();
   const isFacilitator = state.activePersona === 'facilitator';
 
   const [activeThreadId, setActiveThreadId] = useState<string>('thread-1042');
@@ -33,7 +36,11 @@ export const MessagesScreen: React.FC = () => {
     } else {
       startSpeechRecording();
       setTimeout(() => {
-        setInputText('Can we confirm Tray B is ready at Line A?');
+        setInputText(
+          isVi
+            ? 'Chúng ta có thể xác nhận Khay B đã sẵn sàng tại Chuyền A không?'
+            : 'Can we confirm Tray B is ready at Line A?'
+        );
         stopSpeechRecording();
       }, 1500);
     }
@@ -46,42 +53,56 @@ export const MessagesScreen: React.FC = () => {
     {
       id: 'thread-1042',
       taskId: 'INS-1042',
-      taskTitle: 'Pack finished assemblies',
+      taskTitle: isVi ? 'Đóng gói các cụm lắp ráp hoàn thiện' : 'Pack finished assemblies',
       partnerName: isFacilitator ? 'Minh' : 'An',
-      partnerRole: isFacilitator ? 'Assembly Worker' : 'Team lead',
+      partnerRole: isFacilitator
+        ? (isVi ? 'Nhân viên lắp ráp' : 'Assembly Worker')
+        : (isVi ? 'Trưởng nhóm' : 'Team lead'),
       lastMessage: isUpdatedState
-        ? "Great question, Minh! You're right — the units should go to Tray B. I've updated the instruction."
+        ? (isVi
+            ? 'Câu hỏi rất hay, Minh! Bạn nói đúng — các cụm nên chuyển sang Khay B. Tôi đã cập nhật chỉ dẫn.'
+            : "Great question, Minh! You're right — the units should go to Tray B. I've updated the instruction.")
         : isClarificationState
-        ? 'Can we use Tray B instead of Tray A for high-volume units?'
-        : 'Initial standard work assigned to Assembly Line A.',
+        ? (isVi
+            ? 'Chúng ta có thể dùng Khay B thay vì Khay A cho các sản phẩm sản lượng lớn không?'
+            : 'Can we use Tray B instead of Tray A for high-volume units?')
+        : (isVi
+            ? 'Quy chuẩn làm việc ban đầu được giao cho Chuyền lắp ráp A.'
+            : 'Initial standard work assigned to Assembly Line A.'),
       timestamp: isUpdatedState ? '10:14 AM' : isClarificationState ? '10:02 AM' : '09:30 AM',
       unread: isClarificationState && isFacilitator,
       status: isUpdatedState ? 'resolved' : isClarificationState ? 'needs_clarification' : 'in_progress',
-      workArea: 'Line A',
+      workArea: isVi ? 'Chuyền A' : 'Line A',
     },
     {
       id: 'thread-1039',
       taskId: 'INS-1039',
-      taskTitle: 'Inspect wiring harness continuity',
+      taskTitle: isVi ? 'Kiểm tra thông mạch bó dây tín hiệu' : 'Inspect wiring harness continuity',
       partnerName: isFacilitator ? 'Hùng' : 'An',
-      partnerRole: isFacilitator ? 'QC Specialist' : 'Team lead',
-      lastMessage: 'Visual test pin color changed from yellow to blue. Updated on standard sheet.',
-      timestamp: 'Yesterday',
+      partnerRole: isFacilitator
+        ? (isVi ? 'Chuyên viên KCS' : 'QC Specialist')
+        : (isVi ? 'Trưởng nhóm' : 'Team lead'),
+      lastMessage: isVi
+        ? 'Màu chân kiểm tra trực quan đã đổi từ vàng sang xanh lam. Đã cập nhật trên phiếu chuẩn.'
+        : 'Visual test pin color changed from yellow to blue. Updated on standard sheet.',
+      timestamp: isVi ? 'Hôm qua' : 'Yesterday',
       unread: false,
       status: 'resolved',
-      workArea: 'Line A',
+      workArea: isVi ? 'Chuyền A' : 'Line A',
     },
     {
       id: 'thread-safety',
       taskId: 'SAF-002',
-      taskTitle: 'Blind-Corner LED Beacon check',
-      partnerName: 'Safety Committee',
-      partnerRole: 'EHS Department',
-      lastMessage: 'Visual flashing beacon at Intersection 3 is fully operational for the morning shift.',
-      timestamp: '21 Sep',
+      taskTitle: isVi ? 'Kiểm tra đèn chớp LED góc khuất' : 'Blind-Corner LED Beacon check',
+      partnerName: isVi ? 'Ban An toàn' : 'Safety Committee',
+      partnerRole: isVi ? 'Phòng An toàn Môi trường EHS' : 'EHS Department',
+      lastMessage: isVi
+        ? 'Đèn chớp cảnh báo trực quan tại Giao lộ 3 đã hoạt động đầy đủ cho ca sáng.'
+        : 'Visual flashing beacon at Intersection 3 is fully operational for the morning shift.',
+      timestamp: isVi ? '21 Th09' : '21 Sep',
       unread: false,
       status: 'resolved',
-      workArea: 'Plant Wide',
+      workArea: isVi ? 'Toàn nhà máy' : 'Plant Wide',
     },
   ];
 
@@ -101,15 +122,19 @@ export const MessagesScreen: React.FC = () => {
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-100 text-blue-800 border border-blue-200">
-                ADC Stage 4 &amp; 6 · In-Task Clarifications
+                {isVi ? 'ADC Giai đoạn 4 & 6 · Làm rõ trong Tác vụ' : 'ADC Stage 4 & 6 · In-Task Clarifications'}
               </span>
-              <span className="text-xs text-slate-400 font-semibold">Context-Preserving Comms</span>
+              <span className="text-xs text-slate-400 font-semibold">
+                {isVi ? 'Giao tiếp Giữ nguyên Ngữ cảnh' : 'Context-Preserving Comms'}
+              </span>
             </div>
             <h1 className="text-2xl font-extrabold text-slate-950 tracking-tight">
-              Workplace Handoff Messages
+              {isVi ? 'Tin nhắn Bàn giao Nơi làm việc' : 'Workplace Handoff Messages'}
             </h1>
             <p className="text-xs sm:text-sm text-slate-600">
-              Unlike generic chat apps where instructions get lost, every message here is tied directly to a task step with visual proof and lead verification.
+              {isVi
+                ? 'Khác với các ứng dụng nhắn tin thông thường dễ thất lạc chỉ dẫn, mọi tin nhắn ở đây đều gắn liền trực tiếp với từng bước thao tác, kèm bằng chứng trực quan và phê duyệt từ trưởng nhóm.'
+                : 'Unlike generic chat apps where instructions get lost, every message here is tied directly to a task step with visual proof and lead verification.'}
             </p>
           </div>
 
@@ -117,7 +142,7 @@ export const MessagesScreen: React.FC = () => {
             onClick={() => setScreen('worker_detail')}
             className="self-start sm:self-auto px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center gap-2 shrink-0"
           >
-            <span>View Task INS-1042</span>
+            <span>{isVi ? 'Xem nhiệm vụ INS-1042' : 'View Task INS-1042'}</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </button>
         </div>
@@ -133,7 +158,7 @@ export const MessagesScreen: React.FC = () => {
               <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-2.5" />
               <input
                 type="text"
-                placeholder="Search threads by task or person..."
+                placeholder={isVi ? 'Tìm kiếm cuộc trò chuyện theo tác vụ hoặc người...' : 'Search threads by task or person...'}
                 className="w-full pl-8 pr-3 py-1.5 bg-white border border-slate-200 rounded-xl text-xs placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600"
               />
             </div>
@@ -148,7 +173,7 @@ export const MessagesScreen: React.FC = () => {
                     : 'bg-white text-slate-600 hover:bg-slate-100 border border-slate-200'
                 }`}
               >
-                All ({threads.length})
+                {isVi ? `Tất cả (${threads.length})` : `All (${threads.length})`}
               </button>
               <button
                 onClick={() => setFilterType('needs_clarification')}
@@ -159,7 +184,7 @@ export const MessagesScreen: React.FC = () => {
                 }`}
               >
                 <Flag className="w-3 h-3" />
-                <span>Flagged</span>
+                <span>{isVi ? 'Cần làm rõ' : 'Flagged'}</span>
               </button>
               <button
                 onClick={() => setFilterType('resolved')}
@@ -170,7 +195,7 @@ export const MessagesScreen: React.FC = () => {
                 }`}
               >
                 <CheckCircle2 className="w-3 h-3" />
-                <span>Resolved</span>
+                <span>{isVi ? 'Đã giải quyết' : 'Resolved'}</span>
               </button>
             </div>
           </div>
@@ -216,12 +241,12 @@ export const MessagesScreen: React.FC = () => {
                       {thread.status === 'needs_clarification' ? (
                         <span className="px-2 py-0.2 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300 flex items-center gap-1">
                           <Flag className="w-2.5 h-2.5 text-rose-600" />
-                          <span>Needs Clarification</span>
+                          <span>{isVi ? 'Cần làm rõ' : 'Needs Clarification'}</span>
                         </span>
                       ) : (
                         <span className="px-2 py-0.2 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
                           <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" />
-                          <span>Step Verified</span>
+                          <span>{isVi ? 'Đã xác minh bước' : 'Step Verified'}</span>
                         </span>
                       )}
                       <span className="text-[10px] text-slate-400">{thread.workArea}</span>
@@ -262,7 +287,7 @@ export const MessagesScreen: React.FC = () => {
               onClick={() => setScreen('worker_detail')}
               className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition"
             >
-              <span>Jump to Step</span>
+              <span>{isVi ? 'Chuyển đến Bước' : 'Jump to Step'}</span>
               <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
@@ -273,7 +298,11 @@ export const MessagesScreen: React.FC = () => {
             <div className="text-center">
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
                 <ShieldCheck className="w-3.5 h-3.5 text-blue-600" />
-                <span>Thread anchored to Task INS-1042 · Step 2: Place in tray</span>
+                <span>
+                  {isVi
+                    ? 'Cuộc trò chuyện gắn với Tác vụ INS-1042 · Bước 2: Đặt vào khay'
+                    : 'Thread anchored to Task INS-1042 · Step 2: Place in tray'}
+                </span>
               </span>
             </div>
 
@@ -282,16 +311,23 @@ export const MessagesScreen: React.FC = () => {
               <MinhAvatar size="w-8 h-8" name="M" />
               <div className="space-y-1 max-w-md">
                 <div className="flex items-center gap-2 text-[11px] text-slate-500">
-                  <span className="font-bold text-slate-900">Minh (Worker)</span>
+                  <span className="font-bold text-slate-900">
+                    {isVi ? 'Minh (Nhân viên)' : 'Minh (Worker)'}
+                  </span>
                   <span>10:02 AM</span>
                   <span className="px-1.5 py-0.2 rounded bg-rose-100 text-rose-800 font-bold text-[9px]">
-                    Step Clarification
+                    {isVi ? 'Làm rõ bước' : 'Step Clarification'}
                   </span>
                 </div>
                 <div className="bg-white border border-slate-200 rounded-2xl rounded-tl-sm p-3.5 text-xs text-slate-800 shadow-2xs leading-relaxed">
-                  {state.activeContribution?.text || 'Can we use Tray B instead of Tray A for high-volume units?'}
+                  {state.activeContribution?.text ||
+                    (isVi
+                      ? 'Chúng ta có thể dùng Khay B thay vì Khay A cho các sản phẩm sản lượng lớn không?'
+                      : 'Can we use Tray B instead of Tray A for high-volume units?')}
                   <div className="mt-2 pt-2 border-t border-slate-100 text-[10px] text-slate-400">
-                    Flagged directly at Step 2 to avoid stopping the entire line.
+                    {isVi
+                      ? 'Được đánh dấu trực tiếp tại Bước 2 để tránh làm dừng toàn bộ chuyền sản xuất.'
+                      : 'Flagged directly at Step 2 to avoid stopping the entire line.'}
                   </div>
                 </div>
               </div>
@@ -304,17 +340,32 @@ export const MessagesScreen: React.FC = () => {
                 <div className="space-y-1 max-w-md text-right">
                   <div className="flex items-center justify-end gap-2 text-[11px] text-slate-500">
                     <span className="px-1.5 py-0.2 rounded bg-emerald-100 text-emerald-800 font-bold text-[9px]">
-                      Lead Verified
+                      {isVi ? 'Trưởng nhóm đã xác nhận' : 'Lead Verified'}
                     </span>
                     <span>10:14 AM</span>
-                    <span className="font-bold text-slate-900">An (Team lead)</span>
+                    <span className="font-bold text-slate-900">
+                      {isVi ? 'An (Trưởng nhóm)' : 'An (Team lead)'}
+                    </span>
                   </div>
                   <div className="bg-emerald-600 text-white rounded-2xl rounded-tr-sm p-3.5 text-xs text-left shadow-2xs leading-relaxed">
-                    Great question, Minh! You&apos;re right — the units should go to{' '}
-                    <strong className="underline font-bold">Tray B</strong>. I&apos;ve updated the instruction and verified Step 2.
+                    {isVi ? (
+                      <>
+                        Câu hỏi rất hay, Minh! Bạn nói đúng — các cụm nên chuyển sang{' '}
+                        <strong className="underline font-bold">Khay B</strong>. Tôi đã cập nhật chỉ dẫn và xác minh Bước 2.
+                      </>
+                    ) : (
+                      <>
+                        Great question, Minh! You&apos;re right — the units should go to{' '}
+                        <strong className="underline font-bold">Tray B</strong>. I&apos;ve updated the instruction and verified Step 2.
+                      </>
+                    )}
                     <div className="mt-2 pt-2 border-t border-emerald-500/80 text-[10px] text-emerald-100 flex items-center gap-1">
                       <ShieldCheck className="w-3 h-3" />
-                      <span>Provenance stamp applied to Standard Work v2.0</span>
+                      <span>
+                        {isVi
+                          ? 'Đã đóng dấu nguồn gốc vào Quy chuẩn làm việc v2.0'
+                          : 'Provenance stamp applied to Standard Work v2.0'}
+                      </span>
                     </div>
                   </div>
                 </div>
@@ -323,14 +374,18 @@ export const MessagesScreen: React.FC = () => {
               <div className="bg-rose-50 border border-rose-200 rounded-xl p-3 text-xs text-rose-900 flex items-center justify-between gap-3">
                 <div className="flex items-center gap-2">
                   <Flag className="w-4 h-4 text-rose-600 shrink-0" />
-                  <span>Awaiting An&apos;s lead approval to update Step 2 destination.</span>
+                  <span>
+                    {isVi
+                      ? 'Đang chờ Trưởng nhóm An phê duyệt để cập nhật điểm đến Bước 2.'
+                      : "Awaiting An's lead approval to update Step 2 destination."}
+                  </span>
                 </div>
                 <button
                   onClick={() => setGoldenFlowState(3)}
                   className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-bold text-xs shrink-0 flex items-center gap-1"
                 >
                   <Sparkles className="w-3 h-3 text-blue-200" />
-                  <span>Simulate Approval</span>
+                  <span>{isVi ? 'Mô phỏng Phê duyệt' : 'Simulate Approval'}</span>
                 </button>
               </div>
             ) : null}
@@ -338,39 +393,74 @@ export const MessagesScreen: React.FC = () => {
 
           {/* Message Input Box */}
           <div className="p-4 bg-white border-t border-slate-200/80">
+            {/* Quick Prepared Response Chips for Deaf Worker */}
+            {!isFacilitator && (
+              <div className="mb-2.5 flex items-center gap-1.5 overflow-x-auto pb-1 select-none">
+                <span className="text-[11px] font-bold text-slate-500 shrink-0 flex items-center gap-1">
+                  <span>⚡</span>
+                  <span>{isVi ? 'Câu mẫu 1-chạm:' : 'Quick Presets:'}</span>
+                </span>
+                {[
+                  { label: isVi ? 'Khay A đã đầy, xin đổi sang Khay B' : 'Tray A full, swap to Tray B', icon: '✋' },
+                  { label: isVi ? 'Thiếu tem kiểm định KCS xanh lá' : 'Missing green QA labels', icon: '❓' },
+                  { label: isVi ? 'Cần Quản lý An hỗ trợ tại Trạm 04' : 'Need Lead An at Station 04', icon: '🤝' },
+                  { label: isVi ? 'Đã hoàn tất kiểm tra 2 bo mạch' : 'Completed check on 2 units', icon: '✅' },
+                  { label: isVi ? 'Đã hiểu chỉ dẫn & đang thao tác' : 'Understood & in progress', icon: '👍' },
+                ].map((preset, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setInputText(preset.label)}
+                    className="text-[11px] font-semibold bg-slate-100 hover:bg-blue-50 hover:text-blue-700 hover:border-blue-300 border border-slate-200 px-2.5 py-1 rounded-lg transition shrink-0 flex items-center gap-1 text-slate-700 shadow-2xs"
+                  >
+                    <span>{preset.icon}</span>
+                    <span>{preset.label}</span>
+                  </button>
+                ))}
+              </div>
+            )}
+
             <div className="relative rounded-2xl border border-slate-200 focus-within:ring-2 focus-within:ring-blue-600 transition bg-slate-50/50">
               <input
                 type="text"
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
-                placeholder="Reply to this clarification thread..."
+                placeholder={
+                  isFacilitator
+                    ? (isVi ? 'Nhập chỉ đạo hoặc nói qua mic để AI gửi phụ đề cho Minh...' : 'Type directives or dictate via mic to send subtitles to Minh...')
+                    : (isVi ? 'Nhập tin nhắn trao đổi hoặc chọn câu mẫu nhanh ở trên...' : 'Type message or choose a quick preset above...')
+                }
                 className="w-full px-4 py-3 bg-transparent text-xs text-slate-900 placeholder:text-slate-400 focus:outline-hidden"
               />
               <div className="flex items-center justify-between px-3 py-2 border-t border-slate-100 bg-white rounded-b-2xl">
                 <div className="flex items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={handleVoiceToggle}
-                    className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold transition ${
-                      state.isRecordingSpeech
-                        ? 'bg-rose-500 text-white animate-pulse'
-                        : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                    }`}
-                    title="Dictate with voice"
-                  >
-                    {state.isRecordingSpeech ? (
-                      <>
-                        <MicOff className="w-3.5 h-3.5" />
-                        <span>Listening...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Mic className="w-3.5 h-3.5 text-blue-600" />
-                        <span>Dictate</span>
-                      </>
-                    )}
-                  </button>
-                  <span className="text-[11px] text-slate-400">Attached to INS-1042</span>
+                  {isFacilitator && (
+                    <button
+                      type="button"
+                      onClick={handleVoiceToggle}
+                      className={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-lg border transition ${
+                        state.isRecordingSpeech
+                          ? 'bg-rose-50 border-rose-300 text-rose-700 animate-pulse'
+                          : 'bg-white border-slate-200 text-slate-700 hover:bg-slate-50'
+                      }`}
+                    >
+                      {state.isRecordingSpeech ? (
+                        <>
+                          <MicOff className="w-3.5 h-3.5" />
+                          <span>{isVi ? 'Đang lắng nghe...' : 'Listening...'}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Mic className="w-3.5 h-3.5 text-blue-600" />
+                          <span>{isVi ? 'Nói qua mic (Phụ đề)' : 'Dictate (Subtitles)'}</span>
+                        </>
+                      )}
+                    </button>
+                  )}
+
+                  <span className="text-[11px] text-slate-400">
+                    {isVi ? 'Đính kèm INS-1042' : 'Attached to INS-1042'}
+                  </span>
                 </div>
 
                 <button
@@ -378,7 +468,7 @@ export const MessagesScreen: React.FC = () => {
                   onClick={() => setInputText('')}
                   className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-2xs transition flex items-center gap-1.5"
                 >
-                  <span>Send</span>
+                  <span>{isVi ? 'Gửi' : 'Send'}</span>
                   <Send className="w-3 h-3" />
                 </button>
               </div>

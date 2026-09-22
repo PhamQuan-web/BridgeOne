@@ -8,6 +8,7 @@ import {
   FacilitatorResponse,
   ProvenanceField,
   VersionHistoryItem,
+  AssignedLesson,
 } from '../types/handoff';
 import { WORKPLACE_TEMPLATES, WorkplaceIndustry } from '../types/workplaces';
 
@@ -119,10 +120,70 @@ const INITIAL_VERSION_HISTORY: VersionHistoryItem[] = [
   },
 ];
 
+const INITIAL_ASSIGNED_LESSONS: AssignedLesson[] = [
+  {
+    id: 'al-1',
+    titleVi: 'Quy trình kiểm tra bo mạch PCBA & Khay A/B',
+    titleEn: 'PCBA Inspection SOP & Tray A/B Routing',
+    category: 'sop',
+    assignedBy: 'An · Tổ trưởng ca',
+    assignedAt: '08:00 AM',
+    targetWorker: 'Minh · Trạm 04',
+    status: 'completed',
+    score: 100,
+    durationMinutes: 2,
+    summaryVi: 'Hướng dẫn trực quan nhận diện mã lô và chuyển đổi Khay A sang Khay B khi đạt ngưỡng 50 cụm.',
+    summaryEn: 'Visual SOP for batch ID inspection and routing to Tray B at 50-unit threshold.',
+    keySteps: [
+      'Kiểm tra tiếp điểm vi mạch PCBA không trầy xước',
+      'Định tuyến vào Khay A (hoặc Khay B khi có phê duyệt 2 chiều)',
+    ],
+  },
+  {
+    id: 'al-2',
+    titleVi: 'An toàn góc mù & Tín hiệu đèn cảnh báo AGV',
+    titleEn: 'Blind-Corner Safety & AGV Visual Strobe Alerts',
+    category: 'safety',
+    assignedBy: 'An · Tổ trưởng ca',
+    assignedAt: '08:00 AM',
+    targetWorker: 'Minh · Trạm 04',
+    status: 'completed',
+    score: 100,
+    durationMinutes: 2,
+    summaryVi: 'Quy chuẩn an toàn Universal Design: quan sát đèn LED nhấp nháy 360° tại giao lộ xe nâng.',
+    summaryEn: 'Universal safety: watch 360° overhead LED strobe and edge beacon at intersections.',
+    keySteps: [
+      'Giảm tốc độ khi thấy đèn vàng viền sàn nhấp nháy',
+      'Dừng hoàn toàn khi còi quang học chuyển sang nhịp đỏ khẩn cấp',
+    ],
+  },
+  {
+    id: 'al-3',
+    titleVi: 'Giao tiếp hòa nhập DE&I không định kiến',
+    titleEn: 'DE&I Inclusive Comms: Non-biased Feedback',
+    category: 'inclusion',
+    assignedBy: 'An · Tổ trưởng ca',
+    assignedAt: '09:30 AM',
+    targetWorker: 'Minh · Trạm 04',
+    status: 'pending',
+    score: undefined,
+    durationMinutes: 3,
+    summaryVi: 'Kỹ năng phản hồi trực quan dựa trên dữ liệu khách quan, tránh ngôn ngữ phán xét cá nhân.',
+    summaryEn: 'Best practices for providing objective, visual feedback without unconscious bias.',
+    keySteps: [
+      'Giao tiếp qua màn hình chia sẻ và văn bản trực quan',
+      'Tôn trọng văn hóa giao tiếp và nhịp độ làm việc của người Điếc',
+    ],
+  },
+];
+
 const INITIAL_STATE: HandoffState = {
   currentScreen: 'home',
   lifecycleStage: 'draft_shared',
   activePersona: 'worker',
+  isRightSidebarOpen: true,
+  assignedLessons: INITIAL_ASSIGNED_LESSONS,
+  stationCallAlert: null,
 
   taskId: 'INS-1042',
   taskTitle: 'Pack finished assemblies',
@@ -226,7 +287,7 @@ const INITIAL_STATE: HandoffState = {
       id: 'tx-1',
       sender: 'An',
       role: 'lead',
-      text: 'Chào cả đội ca sáng! Hôm nay chú ý vị trí đặt cụm bo mạch và đối chiếu kỹ mã khay nhé.',
+      text: 'Chào cả đội ca sáng! Hôm nay chú ý kiểm tra cụm vi mạch PCBA và đối chiếu kỹ mã khay nhé.',
       timestamp: '08:02 AM',
       isAudioPlayed: true,
     },
@@ -234,16 +295,24 @@ const INITIAL_STATE: HandoffState = {
       id: 'tx-2',
       sender: 'Minh',
       role: 'worker',
-      text: 'Minh đã nhận ca tại Trạm 04. Đang kiểm tra cụm camera INS-1042.',
+      text: 'Minh đã nhận ca tại Trạm 04. Đang kiểm tra khay theo quy trình SOP INS-1042.',
       timestamp: '08:05 AM',
       isAudioPlayed: true,
     },
     {
       id: 'tx-3',
+      sender: 'Minh',
+      role: 'worker',
+      text: 'Khay A đã đầy. Có thể đổi sang Khay B cho các kiện hàng lớn không?',
+      timestamp: '10:14 AM',
+      isAudioPlayed: true,
+    },
+    {
+      id: 'tx-4',
       sender: 'An',
       role: 'lead',
-      text: 'Great question, Minh! You\'re right — the units should go to Tray B (not Tray A). I\'ve updated the instruction.',
-      timestamp: '10:14 AM',
+      text: 'Đồng ý! Minh chuyển sang Khay B nhé. Hệ thống đã cập nhật và đóng tem Provenance.',
+      timestamp: '10:15 AM',
       isAudioPlayed: true,
     },
   ],
@@ -264,6 +333,12 @@ interface HandoffContextType {
   summarizeLiveConversation: () => { summary: string; actionItems: string[]; safetyAlert: string };
   toggleDemoDrawer: () => void;
   setDemoDrawerOpen: (open: boolean) => void;
+  toggleRightSidebar: () => void;
+  triggerStationCall: (station?: string, reason?: string) => void;
+  acceptStationCall: () => void;
+  dismissStationCall: () => void;
+  addAssignedLesson: (lesson: Omit<AssignedLesson, 'id' | 'status' | 'assignedAt'>) => void;
+  completeAssignedLesson: (lessonId: string, score?: number) => void;
   startPreparingMessage: () => void;
   cancelPreparingMessage: () => void;
   updateWorkerDraft: (text: string, topic?: string) => void;
@@ -294,7 +369,7 @@ interface HandoffContextType {
 
 const HandoffContext = createContext<HandoffContextType | undefined>(undefined);
 
-const STORAGE_KEY = 'cung_nhip_handoff_state_v2';
+const STORAGE_KEY = 'bridgeone_handoff_v7';
 
 export const HandoffProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [state, setState] = useState<HandoffState>(() => {
@@ -306,6 +381,7 @@ export const HandoffProvider: React.FC<{ children: ReactNode }> = ({ children })
           return {
             ...INITIAL_STATE,
             ...parsed,
+            liveTranscriptLog: INITIAL_STATE.liveTranscriptLog,
             isDemoDrawerOpen: false, // keep drawer closed on load
           };
         }
@@ -352,6 +428,60 @@ export const HandoffProvider: React.FC<{ children: ReactNode }> = ({ children })
 
   const setDemoDrawerOpen = (open: boolean) => {
     setState((prev) => ({ ...prev, isDemoDrawerOpen: open }));
+  };
+
+  const toggleRightSidebar = () => {
+    setState((prev) => ({ ...prev, isRightSidebarOpen: !prev.isRightSidebarOpen }));
+  };
+
+  const triggerStationCall = (station = 'Trạm 04', reason = 'Cần trao đổi nhanh về tiến độ Khay B') => {
+    setState((prev) => ({
+      ...prev,
+      stationCallAlert: {
+        caller: 'An · Quản lý ca',
+        station,
+        reason,
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      },
+    }));
+  };
+
+  const acceptStationCall = () => {
+    setState((prev) => ({
+      ...prev,
+      stationCallAlert: null,
+      isRightSidebarOpen: true,
+      currentScreen: 'worker_detail',
+    }));
+  };
+
+  const dismissStationCall = () => {
+    setState((prev) => ({
+      ...prev,
+      stationCallAlert: null,
+    }));
+  };
+
+  const addAssignedLesson = (lessonData: Omit<AssignedLesson, 'id' | 'status' | 'assignedAt'>) => {
+    const newLesson: AssignedLesson = {
+      ...lessonData,
+      id: `al-${Date.now()}`,
+      status: 'pending',
+      assignedAt: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+    };
+    setState((prev) => ({
+      ...prev,
+      assignedLessons: [newLesson, ...prev.assignedLessons],
+    }));
+  };
+
+  const completeAssignedLesson = (lessonId: string, score = 100) => {
+    setState((prev) => ({
+      ...prev,
+      assignedLessons: prev.assignedLessons.map((l) =>
+        l.id === lessonId ? { ...l, status: 'completed', score } : l
+      ),
+    }));
   };
 
   const startPreparingMessage = () => {
@@ -1066,10 +1196,20 @@ export const HandoffProvider: React.FC<{ children: ReactNode }> = ({ children })
       isAudioPlayed: true,
     };
 
-    setState((prev) => ({
-      ...prev,
-      liveTranscriptLog: [...prev.liveTranscriptLog, newEntry],
-    }));
+    setState((prev) => {
+      const lastMsg = prev.liveTranscriptLog[prev.liveTranscriptLog.length - 1];
+      if (lastMsg && lastMsg.sender === sender) {
+        const cleanLast = lastMsg.text.trim().toLowerCase().replace(/[.,?!]/g, '');
+        const cleanNew = text.trim().toLowerCase().replace(/[.,?!]/g, '');
+        if (cleanLast === cleanNew || cleanNew.length === 0) {
+          return prev;
+        }
+      }
+      return {
+        ...prev,
+        liveTranscriptLog: [...prev.liveTranscriptLog, newEntry],
+      };
+    });
 
     // Trigger audio utterance if browser supports TTS
     try {
@@ -1145,6 +1285,12 @@ export const HandoffProvider: React.FC<{ children: ReactNode }> = ({ children })
         summarizeLiveConversation,
         toggleDemoDrawer,
         setDemoDrawerOpen,
+        toggleRightSidebar,
+        triggerStationCall,
+        acceptStationCall,
+        dismissStationCall,
+        addAssignedLesson,
+        completeAssignedLesson,
         startPreparingMessage,
         cancelPreparingMessage,
         updateWorkerDraft,

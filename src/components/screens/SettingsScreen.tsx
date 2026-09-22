@@ -18,7 +18,7 @@ import {
 
 export const SettingsScreen: React.FC = () => {
   const { state, switchPersona, resetDemo } = useHandoff();
-  const { t } = useLanguage();
+  const { t, isVi } = useLanguage();
   const isFacilitator = state.activePersona === 'facilitator';
 
   // Universal Design settings state
@@ -99,7 +99,10 @@ export const SettingsScreen: React.FC = () => {
             >
               <Zap className="w-3.5 h-3.5 text-blue-600" />
               <span>
-                {t('settings.switch_persona_prefix', 'Switch to')} {isFacilitator ? 'Minh (Worker)' : 'An (Lead)'}
+                {t('settings.switch_persona_prefix', 'Switch to')}{' '}
+                {isFacilitator
+                  ? (isVi ? 'Minh (Nhân viên)' : 'Minh (Worker)')
+                  : (isVi ? 'An (Trưởng nhóm)' : 'An (Lead)')}
               </span>
             </button>
           </div>

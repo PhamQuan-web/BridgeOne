@@ -25,6 +25,7 @@ import {
   Mic,
   MicOff,
   Flag,
+  RotateCcw,
 } from 'lucide-react';
 
 export const WorkerTaskDetailScreen: React.FC = () => {
@@ -38,28 +39,49 @@ export const WorkerTaskDetailScreen: React.FC = () => {
     stopSpeechRecording,
   } = useHandoff();
 
-  const { language, t } = useLanguage();
+  const { language, t, isVi } = useLanguage();
   const recognitionRef = useRef<any>(null);
 
   const [showChangesDiff, setShowChangesDiff] = useState(false);
   const [savedForLater, setSavedForLater] = useState(false);
   const [isAskModalOpen, setIsAskModalOpen] = useState(false);
   const [questionText, setQuestionText] = useState(
-    'Can we use Tray B instead of Tray A for high-volume units?'
+    isVi
+      ? 'Có thể đổi sang Khay B thay vì Khay A cho các kiện hàng lớn không?'
+      : 'Can we use Tray B instead of Tray A for high-volume units?'
   );
 
   const isUpdatedState = state.isDestinationUpdated || state.lifecycleStage === 'facilitator_replied';
   const isClarificationState = state.lifecycleStage === 'worker_sent';
 
-  const fullInstructionText = isUpdatedState
-    ? "Pack finished assemblies. Step 1: Check unit is complete. Step 2: Gently place the finished unit in Tray B. Step 3: Attach green Completed label. Step 4: Take Tray B to the staging rack."
-    : "Pack finished assemblies. Step 1: Check unit is complete. Step 2: Gently place the finished unit in Tray A. Step 3: Attach green Completed label. Step 4: Take Tray A to the staging rack.";
+  const fullInstructionText = isVi
+    ? (isUpdatedState
+        ? 'Đóng gói cụm linh kiện hoàn tất. Bước 1: Kiểm tra bo mạch hoàn chỉnh. Bước 2: Đặt vào Khay B. Bước 3: Dán nhãn Completed. Bước 4: Chuyển Khay B đến kệ trung gian.'
+        : 'Đóng gói cụm linh kiện hoàn tất. Bước 1: Kiểm tra bo mạch hoàn chỉnh. Bước 2: Đặt vào Khay A. Bước 3: Dán nhãn Completed. Bước 4: Chuyển Khay A đến kệ trung gian.')
+    : (isUpdatedState
+        ? 'Pack finished assemblies. Step 1: Check unit is complete. Step 2: Gently place the finished unit in Tray B. Step 3: Attach green Completed label. Step 4: Take Tray B to the staging rack.'
+        : 'Pack finished assemblies. Step 1: Check unit is complete. Step 2: Gently place the finished unit in Tray A. Step 3: Attach green Completed label. Step 4: Take Tray A to the staging rack.');
 
-  const quickPrompts = [
-    'Can we use Tray B instead of Tray A for high-volume units?',
-    'Where do we place finished units if Tray A is already full?',
-    'Is the green Completed label required before moving to staging?',
-  ];
+  const quickPrompts = isVi
+    ? [
+        'Có thể đổi sang Khay B thay vì Khay A cho các kiện hàng lớn không?',
+        'Nếu Khay A đã đầy thì đặt linh kiện vào đâu tiếp theo?',
+        'Có cần dán nhãn xanh Completed trước khi chuyển sang kệ không?',
+      ]
+    : [
+        'Can we use Tray B instead of Tray A for high-volume units?',
+        'Where do we place finished units if Tray A is already full?',
+        'Is the green Completed label required before moving to staging?',
+      ];
+
+  // Sync question text default on language change if untouched
+  useEffect(() => {
+    setQuestionText(
+      isVi
+        ? 'Có thể đổi sang Khay B thay vì Khay A cho các kiện hàng lớn không?'
+        : 'Can we use Tray B instead of Tray A for high-volume units?'
+    );
+  }, [language, isVi]);
 
   // Set up real speech recognition for worker dictation
   useEffect(() => {
@@ -70,7 +92,7 @@ export const WorkerTaskDetailScreen: React.FC = () => {
         const recognition = new SpeechRecognition();
         recognition.continuous = true;
         recognition.interimResults = true;
-        recognition.lang = language === 'vi' ? 'vi-VN' : 'en-US';
+        recognition.lang = isVi ? 'vi-VN' : 'en-US';
 
         recognition.onresult = (event: any) => {
           let text = '';
@@ -95,7 +117,7 @@ export const WorkerTaskDetailScreen: React.FC = () => {
         // Fallback
       }
     }
-  }, [language]);
+  }, [language, isVi]);
 
   const handleVoiceToggle = () => {
     if (state.isRecordingSpeech) {
@@ -113,15 +135,22 @@ export const WorkerTaskDetailScreen: React.FC = () => {
         try {
           recognitionRef.current.start();
         } catch {
-          // If unsupported or blocked, provide graceful input
           setTimeout(() => {
-            setQuestionText('Có thể đổi sang Khay B thay vì Khay A cho các kiện hàng lớn không?');
+            setQuestionText(
+              isVi
+                ? 'Có thể đổi sang Khay B thay vì Khay A cho các kiện hàng lớn không?'
+                : 'Can we use Tray B instead of Tray A for high-volume units?'
+            );
             stopSpeechRecording();
           }, 1500);
         }
       } else {
         setTimeout(() => {
-          setQuestionText('Có thể đổi sang Khay B thay vì Khay A cho các kiện hàng lớn không?');
+          setQuestionText(
+            isVi
+              ? 'Có thể đổi sang Khay B thay vì Khay A cho các kiện hàng lớn không?'
+              : 'Can we use Tray B instead of Tray A for high-volume units?'
+          );
           stopSpeechRecording();
         }, 1500);
       }
@@ -137,32 +166,48 @@ export const WorkerTaskDetailScreen: React.FC = () => {
 
   return (
     <div className="space-y-6">
-      {/* 1. Top Navigation Bar: Back & Task Pagination */}
-      <div className="flex items-center justify-between">
-        <button
-          onClick={() => setScreen('home')}
-          className="flex items-center gap-2 text-sm font-bold text-slate-700 hover:text-blue-600 transition px-3 py-1.5 rounded-xl hover:bg-slate-100"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          <span>{t('worker_detail.back', '← Quay lại danh sách nhiệm vụ')}</span>
-        </button>
+      {/* 1. Integrated Breadcrumb & Task Context Bar */}
+      <div className="flex items-center justify-between py-1">
+        <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
+          <button
+            onClick={() => setScreen('home')}
+            className="hover:text-blue-600 flex items-center gap-1.5 font-bold transition text-slate-700"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            <span>{isVi ? 'Trang chủ' : 'Home'}</span>
+          </button>
+          <span>/</span>
+          <span className="text-slate-600">{isVi ? 'Dây chuyền A' : 'Line A'}</span>
+          <span>/</span>
+          <span className="font-extrabold text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200">
+            INS-1042
+          </span>
+        </div>
 
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-semibold text-slate-500">Nhiệm vụ 3 / 8</span>
-          <div className="flex items-center gap-1.5">
+        <div className="flex items-center gap-2 text-xs font-semibold text-slate-500">
+          <button
+            onClick={() => setGoldenFlowState(1)}
+            className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 text-xs font-bold transition shadow-2xs mr-1 cursor-pointer"
+            title={isVi ? 'Tái lập lại quy trình ban đầu (Khay A) để quay lại Shot 2 (Phím tắt: Option+1)' : 'Reset to initial flow (Tray A) for demo (Shortcut: Option+1)'}
+          >
+            <RotateCcw className="w-3.5 h-3.5 text-amber-700" />
+            <span>{isVi ? 'Làm lại Shot 2 (Khay A)' : 'Restart Shot 2'}</span>
+          </button>
+          <span className="hidden sm:inline">{t('worker_detail.task_paging')}</span>
+          <div className="flex items-center gap-1">
             <button
               onClick={() => setScreen('home')}
-              className="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center shadow-2xs transition"
-              title="Previous task"
+              className="w-7 h-7 rounded-lg bg-white border border-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center shadow-2xs transition"
+              title={isVi ? 'Nhiệm vụ trước' : 'Previous task'}
             >
-              <ChevronLeft className="w-4 h-4" />
+              <ChevronLeft className="w-3.5 h-3.5" />
             </button>
             <button
               onClick={() => setScreen('ask_suggest')}
-              className="w-8 h-8 rounded-lg bg-white border border-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center shadow-2xs transition"
-              title="Next task"
+              className="w-7 h-7 rounded-lg bg-white border border-slate-200 text-slate-500 hover:text-slate-800 flex items-center justify-center shadow-2xs transition"
+              title={isVi ? 'Nhiệm vụ tiếp theo' : 'Next task'}
             >
-              <ChevronRight className="w-4 h-4" />
+              <ChevronRight className="w-3.5 h-3.5" />
             </button>
           </div>
         </div>
@@ -176,34 +221,44 @@ export const WorkerTaskDetailScreen: React.FC = () => {
           <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-2">
               {isUpdatedState ? (
-                <span className="px-3 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1.5 shadow-2xs">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                  <span>ĐÃ XÁC MINH (KHAY B)</span>
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="px-3 py-1 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1.5 shadow-2xs">
+                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+                    <span>{t('worker_detail.badge_verified')}</span>
+                  </span>
+                  <button
+                    onClick={() => setGoldenFlowState(1)}
+                    className="px-2.5 py-1 rounded-full text-xs font-bold bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 flex items-center gap-1 transition shadow-2xs cursor-pointer"
+                    title={isVi ? 'Khôi phục lại Khay A để làm lại quy trình' : 'Reset to Tray A'}
+                  >
+                    <RotateCcw className="w-3 h-3 text-amber-700" />
+                    <span>{isVi ? 'Làm lại quy trình (Khay A)' : 'Reset Flow'}</span>
+                  </button>
+                </div>
               ) : isClarificationState ? (
                 <span className="px-3 py-1 rounded-full text-xs font-black bg-rose-100 text-rose-800 border border-rose-300 flex items-center gap-1.5 animate-pulse">
                   <Flag className="w-4 h-4 text-rose-600" />
-                  <span>CẦN LÀM RÕ (CHỜ DUYỆT)</span>
+                  <span>{t('worker_detail.badge_clarifying')}</span>
                 </span>
               ) : (
                 <span className="px-3 py-1 rounded-full text-xs font-black bg-blue-100 text-blue-800 border border-blue-300">
-                  ĐANG THỰC HIỆN
+                  {t('worker_detail.badge_in_progress')}
                 </span>
               )}
               <span className="px-3 py-1 rounded-full text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200">
-                Dây chuyền A
+                {t('worker_detail.line')}
               </span>
               <span className="text-xs text-slate-500 font-extrabold">INS-1042</span>
             </div>
 
             <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
               <h1 className="text-2xl sm:text-3xl font-black text-slate-950 tracking-tight">
-                Đóng gói cụm linh kiện hoàn tất (SOP)
+                {t('worker_detail.title')}
               </h1>
               {/* Cursive quote */}
               <div className="flex items-center gap-1 transform rotate-[-2deg]">
                 <span className="font-handwriting text-blue-600 text-2xl font-bold">
-                  Questions make work better.
+                  {t('brand.handwritten_quote')}
                 </span>
                 <div className="text-emerald-500 flex gap-0.5 ml-1">
                   <span className="font-bold text-xs">/</span>
@@ -214,45 +269,23 @@ export const WorkerTaskDetailScreen: React.FC = () => {
             </div>
 
             <p className="text-sm sm:text-base text-slate-600 font-medium">
-              Đóng gói an toàn các cụm linh kiện hoàn thiện vào đúng khay quy định để đưa sang kệ đệm tiếp theo.
+              {t('worker_detail.desc')}
             </p>
 
             {/* Meta tags & Action Buttons */}
             <div className="flex flex-wrap items-center gap-2.5 pt-1 text-xs sm:text-sm text-slate-600">
               <span className="px-3 py-1.5 bg-white border border-slate-200 rounded-xl font-bold text-slate-800 shadow-2xs">
-                Độ khó: Vừa phải
+                {t('worker_detail.difficulty')}
               </span>
               <span className="px-3 py-1.5 bg-white border border-slate-200 rounded-xl font-medium text-slate-600 flex items-center gap-1.5 shadow-2xs">
                 <Clock className="w-4 h-4 text-slate-400" />
-                ~ 5 phút
+                {t('worker_detail.duration')}
               </span>
               <span className="px-3 py-1.5 bg-white border border-slate-200 rounded-xl font-medium text-slate-600 shadow-2xs">
-                Quy trình chuẩn
+                {t('home.standard_work')}
               </span>
 
-              {/* TTS Read Aloud */}
-              <button
-                id="btn-tts-read-aloud"
-                onClick={() => playTextToSpeech(fullInstructionText)}
-                className={`px-3.5 py-1.5 rounded-xl font-bold text-xs sm:text-sm transition flex items-center gap-2 shadow-2xs border ${
-                  state.ttsPlaying
-                    ? 'bg-blue-600 text-white border-blue-600 animate-pulse'
-                    : 'bg-white hover:bg-slate-50 text-blue-700 border-blue-200'
-                }`}
-                title="Đọc to hướng dẫn từng bước ra loa (TTS)"
-              >
-                {state.ttsPlaying ? (
-                  <>
-                    <VolumeX className="w-4 h-4" />
-                    <span>Dừng giọng đọc</span>
-                  </>
-                ) : (
-                  <>
-                    <Volume2 className="w-4 h-4 text-blue-600" />
-                    <span>Đọc to hướng dẫn (TTS)</span>
-                  </>
-                )}
-              </button>
+
 
               {/* In-Task Ask Button */}
               {!isUpdatedState && (
@@ -262,7 +295,7 @@ export const WorkerTaskDetailScreen: React.FC = () => {
                   className="px-3.5 py-1.5 rounded-xl font-bold text-xs sm:text-sm bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-300 transition flex items-center gap-1.5 shadow-2xs"
                 >
                   <MessageSquarePlus className="w-4 h-4 text-blue-600" />
-                  <span>Báo cờ đỏ / Hỏi quản lý</span>
+                  <span>{t('worker_detail.flag_ask')}</span>
                 </button>
               )}
             </div>
@@ -277,13 +310,13 @@ export const WorkerTaskDetailScreen: React.FC = () => {
                 </div>
                 <div className="space-y-0.5">
                   <div className="font-extrabold text-xs text-rose-900 flex items-center gap-2">
-                    <span>Task Flagged: Needs Clarification</span>
+                    <span>{isVi ? 'Đã báo cờ: Cần làm rõ' : 'Task Flagged: Needs Clarification'}</span>
                     <span className="text-[10px] bg-rose-200 text-rose-900 px-1.5 py-0.2 rounded font-bold">
-                      Awaiting An (Lead)
+                      {isVi ? 'Đang chờ Quản lý An' : 'Awaiting An (Lead)'}
                     </span>
                   </div>
                   <p className="text-xs text-rose-800 leading-snug">
-                    Minh asked: &ldquo;{state.activeContribution?.text || 'Can we use Tray B instead of Tray A for high-volume units?'}&rdquo;
+                    {isVi ? 'Minh đã hỏi: ' : 'Minh asked: '}&ldquo;{state.activeContribution?.text || questionText}&rdquo;
                   </p>
                 </div>
               </div>
@@ -291,10 +324,10 @@ export const WorkerTaskDetailScreen: React.FC = () => {
                 id="btn-view-clarification-thread"
                 onClick={() => setScreen('messages')}
                 className="px-3.5 py-1.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5 shrink-0"
-                title="Xem tiến trình phản hồi trong hộp thư"
+                title={isVi ? 'Xem tiến trình phản hồi trong hộp thư' : 'View clarification in messages'}
               >
                 <MessageSquarePlus className="w-3.5 h-3.5 text-white" />
-                <span>Xem hộp thư</span>
+                <span>{isVi ? 'Xem hộp thư' : 'View Messages'}</span>
               </button>
             </div>
           )}
@@ -302,13 +335,13 @@ export const WorkerTaskDetailScreen: React.FC = () => {
           {/* Steps List Card */}
           <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-xs space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-              <h2 className="text-base font-extrabold text-slate-900">Steps</h2>
+              <h2 className="text-base font-extrabold text-slate-900">{t('worker_detail.steps_heading')}</h2>
               {isUpdatedState && (
                 <button
                   onClick={() => setShowChangesDiff(!showChangesDiff)}
                   className="text-xs font-semibold text-slate-600 hover:text-slate-900 flex items-center gap-1 bg-slate-50 hover:bg-slate-100 px-2.5 py-1 rounded-lg border border-slate-200 transition"
                 >
-                  <span>View changes</span>
+                  <span>{t('worker_detail.view_changes')}</span>
                   <ChevronDown className={`w-3.5 h-3.5 transition-transform ${showChangesDiff ? 'rotate-180' : ''}`} />
                 </button>
               )}
@@ -319,13 +352,13 @@ export const WorkerTaskDetailScreen: React.FC = () => {
               <div className="bg-emerald-50/80 border border-emerald-200 rounded-xl p-3 text-xs text-emerald-950 space-y-1">
                 <div className="font-bold flex items-center gap-1.5 text-emerald-800">
                   <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                  <span>Version Change Details (Updated by An · 10:14 AM)</span>
+                  <span>{isVi ? 'Chi tiết thay đổi phiên bản (Cập nhật bởi An lúc 10:14 AM)' : 'Version Change Details (Updated by An · 10:14 AM)'}</span>
                 </div>
                 <p className="text-emerald-900">
-                  • Step 2 Destination changed from <del className="text-emerald-600 font-semibold">Tray A</del> to <strong className="font-bold underline text-emerald-800">Tray B</strong>.
+                  • {t('worker_detail.diff_step2')}
                 </p>
                 <p className="text-emerald-900">
-                  • Step 4 Staging destination updated to <strong className="font-bold text-emerald-800">Tray B</strong>. Clearer photos added.
+                  • {t('worker_detail.diff_step4')}
                 </p>
               </div>
             )}
@@ -340,10 +373,10 @@ export const WorkerTaskDetailScreen: React.FC = () => {
                   </div>
                   <div className="space-y-1">
                     <h3 className="font-bold text-sm text-slate-900">
-                      Check unit is complete
+                      {t('worker_detail.step1_title')}
                     </h3>
                     <p className="text-xs text-slate-600 leading-relaxed">
-                      Make sure all components are securely attached and no parts are loose.
+                      {t('worker_detail.step1_desc')}
                     </p>
                   </div>
                 </div>
@@ -367,15 +400,15 @@ export const WorkerTaskDetailScreen: React.FC = () => {
                     <div className="space-y-1.5">
                       <div className="flex items-center gap-2">
                         <h3 className="font-bold text-sm text-slate-900">
-                          Place in tray
+                          {t('worker_detail.step2_title')}
                         </h3>
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
                           <CheckCircle2 className="w-3 h-3 text-emerald-600" />
-                          <span>Updated</span>
+                          <span>{isVi ? 'Đã cập nhật' : 'Updated'}</span>
                         </span>
                       </div>
                       <p className="text-xs text-slate-800 leading-relaxed">
-                        Gently place the finished unit in <strong className="text-emerald-800 font-extrabold underline">Tray B</strong>.
+                        {t('worker_detail.step2_desc_b')}
                       </p>
                       {/* CRITICAL ACCOUNTABILITY STAMP */}
                       <div
@@ -383,7 +416,7 @@ export const WorkerTaskDetailScreen: React.FC = () => {
                         className="text-[11px] text-emerald-800 font-semibold flex items-center gap-1.5 pt-1 border-t border-emerald-200/80 mt-1"
                       >
                         <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-                        <span>✔ Verified by An (Lead) · Provenance: Worker Question Handoff</span>
+                        <span>{t('worker_detail.step2_stamp')}</span>
                       </div>
                     </div>
                   </div>
@@ -405,19 +438,19 @@ export const WorkerTaskDetailScreen: React.FC = () => {
                     <div className="space-y-1.5">
                       <div className="flex items-center gap-2">
                         <h3 className="font-bold text-sm text-slate-900">
-                          Place in tray
+                          {t('worker_detail.step2_title')}
                         </h3>
                         <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800 border border-rose-300 flex items-center gap-1">
                           <Flag className="w-3 h-3 text-rose-600" />
-                          <span>Needs clarification</span>
+                          <span>{isVi ? 'Cần làm rõ' : 'Needs clarification'}</span>
                         </span>
                       </div>
                       <p className="text-xs text-slate-800 leading-relaxed">
-                        Gently place the finished unit in <strong className="text-slate-900 font-bold">Tray A</strong>.
+                        {t('worker_detail.step2_desc_a')}
                       </p>
                       <div className="text-[11px] text-rose-700 bg-rose-100/70 p-2 rounded-lg border border-rose-200 space-y-0.5">
-                        <span className="font-bold block">Minh&apos;s Question:</span>
-                        <span>&ldquo;Can we use Tray B instead of Tray A for high-volume units?&rdquo;</span>
+                        <span className="font-bold block">{isVi ? 'Câu hỏi của Minh:' : "Minh's Question:"}</span>
+                        <span>&ldquo;{state.activeContribution?.text || questionText}&rdquo;</span>
                       </div>
                     </div>
                   </div>
@@ -439,21 +472,21 @@ export const WorkerTaskDetailScreen: React.FC = () => {
                     <div className="space-y-2">
                       <div className="flex items-center gap-2">
                         <h3 className="font-bold text-sm text-slate-900">
-                          Place in tray
+                          {t('worker_detail.step2_title')}
                         </h3>
                         <span className="text-[10px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded font-medium border border-slate-200">
-                          Standard Work (Tray A)
+                          {isVi ? 'Quy trình chuẩn (Khay A)' : 'Standard Work (Tray A)'}
                         </span>
                       </div>
                       <p className="text-xs text-slate-700 leading-relaxed">
-                        Gently place the finished unit in <strong className="text-slate-950 font-extrabold">Tray A</strong>.
+                        {t('worker_detail.step2_desc_a')}
                       </p>
                       {/* Bottleneck Callout with Direct In-Task Action */}
                       <div className="pt-1">
                         <div className="bg-amber-50/80 border border-amber-200 rounded-xl p-2.5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
                           <span className="text-[11px] text-amber-800 font-medium flex items-center gap-1.5">
                             <AlertTriangle className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                            <span>Khay A đã đầy? Có thắc mắc tại bước này?</span>
+                            <span>{t('worker_detail.step2_bottleneck')}</span>
                           </span>
                           <button
                             id="btn-ask-at-step-2"
@@ -461,7 +494,7 @@ export const WorkerTaskDetailScreen: React.FC = () => {
                             className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-lg shadow-2xs flex items-center gap-1.5 transition shrink-0"
                           >
                             <MessageSquarePlus className="w-3.5 h-3.5" />
-                            <span>Ask or suggest</span>
+                            <span>{t('worker_detail.step2_ask_btn')}</span>
                           </button>
                         </div>
                       </div>
@@ -482,10 +515,10 @@ export const WorkerTaskDetailScreen: React.FC = () => {
                   </div>
                   <div className="space-y-1">
                     <h3 className="font-bold text-sm text-slate-900">
-                      Add label
+                      {t('worker_detail.step3_title')}
                     </h3>
                     <p className="text-xs text-slate-600 leading-relaxed">
-                      Attach a green &ldquo;Completed&rdquo; label to the top of the unit.
+                      {t('worker_detail.step3_desc')}
                     </p>
                   </div>
                 </div>
@@ -503,14 +536,10 @@ export const WorkerTaskDetailScreen: React.FC = () => {
                   </div>
                   <div className="space-y-1">
                     <h3 className="font-bold text-sm text-slate-900">
-                      Move to next stage
+                      {t('worker_detail.step4_title')}
                     </h3>
                     <p className="text-xs text-slate-600 leading-relaxed">
-                      Take {isUpdatedState ? (
-                        <strong className="text-emerald-800 font-bold underline">Tray B</strong>
-                      ) : (
-                        <strong className="text-slate-800 font-bold">Tray A</strong>
-                      )} to the staging rack.
+                      {t('worker_detail.step4_desc')}
                     </p>
                   </div>
                 </div>
@@ -531,10 +560,10 @@ export const WorkerTaskDetailScreen: React.FC = () => {
                 </div>
                 <div className="space-y-1">
                   <h4 className="font-extrabold text-sm text-emerald-950">
-                    This instruction has been updated based on your question.
+                    {t('worker_detail.updated_banner_title')}
                   </h4>
                   <p className="text-xs text-emerald-900 leading-relaxed">
-                    Changes are highlighted in green. You can still ask another question or view the published standard work.
+                    {t('worker_detail.updated_banner_desc')}
                   </p>
                 </div>
               </div>
@@ -546,7 +575,7 @@ export const WorkerTaskDetailScreen: React.FC = () => {
                   className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-2"
                 >
                   <MessageSquarePlus className="w-3.5 h-3.5" />
-                  <span>Ask another question</span>
+                  <span>{t('worker_detail.ask_another')}</span>
                 </button>
                 <button
                   id="task-detail-view-sop-btn"
@@ -554,7 +583,7 @@ export const WorkerTaskDetailScreen: React.FC = () => {
                   className="px-4 py-2 bg-white hover:bg-slate-50 text-slate-700 font-semibold text-xs rounded-xl border border-slate-200 shadow-2xs transition flex items-center gap-1.5"
                 >
                   <FileText className="w-3.5 h-3.5 text-blue-600" />
-                  <span>View published standard work</span>
+                  <span>{t('worker_detail.view_sop')}</span>
                 </button>
               </div>
             </div>
@@ -570,7 +599,7 @@ export const WorkerTaskDetailScreen: React.FC = () => {
                 <span className="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center text-[10px]">
                   ✓
                 </span>
-                <span>Facilitator reply</span>
+                <span>{t('worker_detail.lead_reply_title')}</span>
               </div>
 
               <div className="space-y-2.5">
@@ -580,16 +609,21 @@ export const WorkerTaskDetailScreen: React.FC = () => {
                     <div className="flex items-center gap-1.5">
                       <span className="font-extrabold text-xs text-slate-900">An</span>
                       <span className="text-[10px] font-semibold text-amber-800 bg-amber-100 px-1.5 py-0.2 rounded border border-amber-300">
-                        Team lead
+                        {t('persona.lead_title')}
                       </span>
                     </div>
-                    <span className="text-[11px] text-slate-400">Today at 10:14 AM</span>
+                    <span className="text-[11px] text-slate-400">{isVi ? 'Hôm nay lúc 10:14 AM' : 'Today at 10:14 AM'}</span>
                   </div>
                 </div>
 
                 <div className="bg-emerald-50/50 rounded-xl p-3.5 text-xs text-slate-800 leading-relaxed border border-emerald-100">
-                  Great question, Minh! You&apos;re right — the units should go to{' '}
-                  <strong className="text-emerald-800 font-extrabold underline">Tray B</strong>. I&apos;ve updated the instruction.
+                  {isVi
+                    ? 'Câu hỏi của Minh rất hay! Đúng vậy, các kiện hàng nên chuyển sang '
+                    : 'Great question, Minh! You’re right — the units should go to '}
+                  <strong className="text-emerald-800 font-extrabold underline">
+                    {isVi ? 'Khay B' : 'Tray B'}
+                  </strong>
+                  {isVi ? '. Quản lý đã cập nhật chỉ dẫn.' : ". I've updated the instruction."}
                 </div>
               </div>
             </div>
@@ -598,17 +632,17 @@ export const WorkerTaskDetailScreen: React.FC = () => {
             <div className="bg-white rounded-2xl p-5 border border-rose-200 shadow-xs space-y-3 animate-in fade-in duration-200">
               <div className="flex items-center gap-2 text-rose-700 font-bold text-xs">
                 <Flag className="w-4 h-4 text-rose-600" />
-                <span>Waiting for An&apos;s review</span>
+                <span>{t('worker_detail.waiting_lead_title')}</span>
               </div>
               <p className="text-xs text-slate-600 leading-relaxed">
-                Your question was sent to An (Team lead). As soon as An confirms, Step 2 will update automatically.
+                {t('worker_detail.waiting_lead_desc')}
               </p>
               <button
                 onClick={() => setGoldenFlowState(3)}
                 className="w-full py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5 shadow-2xs"
               >
                 <Sparkles className="w-3.5 h-3.5 text-blue-200" />
-                <span>Simulate An&apos;s Approval</span>
+                <span>{t('worker_detail.simulate_approval')}</span>
               </button>
             </div>
           ) : (
@@ -616,17 +650,17 @@ export const WorkerTaskDetailScreen: React.FC = () => {
             <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs space-y-3">
               <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
                 <MessageSquarePlus className="w-4 h-4 text-blue-600" />
-                <span>In-Task Clarification</span>
+                <span>{t('worker_detail.in_task_clarify_title')}</span>
               </div>
               <p className="text-xs text-slate-600 leading-relaxed">
-                Notice an issue or capacity bottleneck on Assembly Line A? Ask An directly without stopping the whole team.
+                {t('worker_detail.in_task_clarify_desc')}
               </p>
               <button
                 onClick={() => setIsAskModalOpen(true)}
                 className="w-full py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-xl text-xs font-bold transition flex items-center justify-center gap-1.5"
               >
                 <MessageSquarePlus className="w-3.5 h-3.5" />
-                <span>Ask or suggest</span>
+                <span>{t('worker_detail.step2_ask_btn')}</span>
               </button>
             </div>
           )}
@@ -637,13 +671,13 @@ export const WorkerTaskDetailScreen: React.FC = () => {
               <div className="flex items-center gap-2.5">
                 <MinhAvatar size="w-7 h-7" name="M" />
                 <div>
-                  <span className="font-extrabold text-xs text-slate-900">Your question (Minh)</span>
-                  <span className="text-[11px] text-slate-400 block">Today at 10:02 AM</span>
+                  <span className="font-extrabold text-xs text-slate-900">{t('worker_detail.your_question')}</span>
+                  <span className="text-[11px] text-slate-400 block">{isVi ? 'Hôm nay lúc 10:02 AM' : 'Today at 10:02 AM'}</span>
                 </div>
               </div>
 
               <p className="text-xs text-slate-700 leading-relaxed bg-slate-50/70 p-3 rounded-xl border border-slate-100">
-                {state.activeContribution?.text || 'Can we use Tray B instead of Tray A for high-volume units?'}
+                {state.activeContribution?.text || questionText}
               </p>
             </div>
           )}
@@ -652,10 +686,10 @@ export const WorkerTaskDetailScreen: React.FC = () => {
           <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs space-y-3">
             <div className="flex items-center gap-2 text-xs font-bold text-slate-800">
               <FileText className="w-4 h-4 text-blue-600" />
-              <span>Standard Work Document</span>
+              <span>{t('worker_detail.standard_doc_title')}</span>
             </div>
             <div className="text-[11px] text-slate-500 font-medium flex items-center gap-1.5">
-              <span>Assembly Line A · Document INS-1042</span>
+              <span>{t('worker_detail.standard_doc_sub')}</span>
             </div>
 
             <div className="space-y-2 pt-1">
@@ -664,7 +698,7 @@ export const WorkerTaskDetailScreen: React.FC = () => {
                 onClick={() => setScreen('published')}
                 className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center justify-center gap-1.5"
               >
-                <span>View published SOP</span>
+                <span>{t('worker_detail.view_sop')}</span>
                 <ExternalLink className="w-3.5 h-3.5" />
               </button>
 
@@ -677,13 +711,13 @@ export const WorkerTaskDetailScreen: React.FC = () => {
                 }`}
               >
                 <Bookmark className="w-3.5 h-3.5" />
-                <span>{savedForLater ? 'Saved in bookmarks' : 'Save for later'}</span>
+                <span>{savedForLater ? t('worker_detail.saved_later') : t('worker_detail.save_later')}</span>
               </button>
             </div>
           </div>
 
-          {/* Botanical Hill Illustration in bottom right */}
-          <BotanicalCorner phrase="More inclusion. Brighter tomorrows." />
+          {/* Botanical Illustration in bottom right */}
+          <BotanicalCorner phrase={isVi ? 'Hòa nhập hơn. Tương lai sáng hơn.' : 'More inclusion. Brighter tomorrows.'} />
         </div>
       </div>
 
@@ -695,9 +729,7 @@ export const WorkerTaskDetailScreen: React.FC = () => {
           aria-labelledby="modal-ask-suggest-title"
           className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-xs flex items-center justify-center p-4 transition-opacity animate-in fade-in duration-150"
         >
-          <div
-            className="w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col animate-in zoom-in-95 duration-150"
-          >
+          <div className="w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col animate-in zoom-in-95 duration-150">
             {/* Modal Header */}
             <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
               <div className="flex items-center gap-2.5">
@@ -706,10 +738,10 @@ export const WorkerTaskDetailScreen: React.FC = () => {
                 </div>
                 <div>
                   <h2 id="modal-ask-suggest-title" className="font-extrabold text-sm text-slate-950">
-                    Ask or suggest · Step 2: Place in tray
+                    {t('worker_detail.modal_title')}
                   </h2>
                   <p className="text-[11px] text-slate-500">
-                    Task INS-1042 · Direct to An (Team lead)
+                    {t('worker_detail.modal_sub')}
                   </p>
                 </div>
               </div>
@@ -717,7 +749,7 @@ export const WorkerTaskDetailScreen: React.FC = () => {
                 id="btn-close-ask-modal"
                 onClick={() => setIsAskModalOpen(false)}
                 className="w-8 h-8 rounded-lg hover:bg-slate-200 text-slate-400 hover:text-slate-700 flex items-center justify-center transition"
-                title="Close modal (Esc)"
+                title={t('worker_detail.cancel')}
               >
                 <X className="w-4 h-4" />
               </button>
@@ -726,18 +758,20 @@ export const WorkerTaskDetailScreen: React.FC = () => {
             {/* Modal Body */}
             <div className="p-5 space-y-4">
               <p className="text-xs text-slate-600 leading-relaxed">
-                Have a question about Tray A capacity or parts handling? Choose a quick prompt or type your question:
+                {isVi
+                  ? 'Có thắc mắc về sức chứa Khay A hoặc thao tác linh kiện? Chọn câu gợi ý nhanh hoặc tự nhập câu hỏi:'
+                  : 'Have a question about Tray A capacity or parts handling? Choose a quick prompt or type your question:'}
               </p>
 
               {/* Quick Prompts List */}
               <div className="space-y-1.5">
                 <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wide">
-                  Quick Prompts (Click to use)
+                  {t('worker_detail.quick_prompts_title')}
                 </span>
                 <div className="space-y-1.5">
                   {quickPrompts.map((prompt, idx) => {
                     const isSelected = questionText === prompt;
-                    const isPrimary = prompt.includes('Tray B instead of Tray A');
+                    const isPrimary = prompt.includes('Khay B') || prompt.includes('Tray B');
                     return (
                       <button
                         key={idx}
@@ -748,13 +782,13 @@ export const WorkerTaskDetailScreen: React.FC = () => {
                             ? 'bg-blue-50 border-blue-500 text-blue-950 font-bold shadow-2xs'
                             : isPrimary
                             ? 'bg-amber-50/60 border-amber-300 hover:bg-amber-50 text-slate-800 font-medium'
-                            : 'bg-slate-50 border-slate-200 hover:bg-slate-100 text-slate-700'
+                            : 'bg-slate-50/60 border-slate-200 hover:bg-slate-100 text-slate-700'
                         }`}
                       >
-                        <span>&ldquo;{prompt}&rdquo;</span>
+                        <span>{prompt}</span>
                         {isPrimary && (
-                          <span className="text-[10px] font-bold bg-amber-200 text-amber-900 px-1.5 py-0.5 rounded shrink-0">
-                            Recommended
+                          <span className="px-1.5 py-0.5 rounded text-[10px] font-extrabold bg-amber-100 text-amber-800 shrink-0">
+                            {isVi ? 'Khuyên dùng' : 'Recommended'}
                           </span>
                         )}
                       </button>
@@ -763,74 +797,48 @@ export const WorkerTaskDetailScreen: React.FC = () => {
                 </div>
               </div>
 
-              {/* Form Input with Dictation */}
-              <form onSubmit={handleSendQuestion} className="space-y-3">
-                <div className="relative">
+              {/* Form Input Area with Voice Dictation */}
+              <form onSubmit={handleSendQuestion} className="space-y-3 pt-1">
+                <div>
+                  <div className="flex items-center justify-between mb-1">
+                    <label htmlFor="worker-question-input" className="text-xs font-bold text-slate-800">
+                      {isVi ? 'Nội dung câu hỏi gửi Quản lý An' : 'Your question to Lead An'}
+                    </label>
+                  </div>
                   <textarea
-                    id="ask-modal-textarea"
+                    id="worker-question-input"
                     rows={3}
                     value={questionText}
                     onChange={(e) => setQuestionText(e.target.value)}
-                    placeholder="Type your question or clarification..."
-                    className="w-full rounded-2xl border border-slate-200 p-3 pb-8 text-xs text-slate-900 placeholder:text-slate-400 focus:outline-hidden focus:ring-2 focus:ring-blue-600 focus:border-transparent transition resize-none leading-relaxed"
+                    placeholder={isVi ? 'Nhập nội dung câu hỏi hoặc mô tả vướng mắc...' : 'Type your question or clarification request...'}
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:outline-hidden focus:ring-2 focus:ring-blue-600 resize-none font-medium"
                   />
+                </div>
 
-                  {/* Textarea Bottom Tools */}
-                  <div className="absolute bottom-2 left-3 right-3 flex items-center justify-between text-[11px]">
+                <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                  <div className="text-[11px] text-slate-400 flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                    <span>{isVi ? 'Tự động lưu vết bảo vệ công nhân' : 'Immutable audit trail active'}</span>
+                  </div>
+
+                  <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      onClick={handleVoiceToggle}
-                      className={`flex items-center gap-1.5 px-2 py-0.5 rounded-lg font-semibold transition ${
-                        state.isRecordingSpeech
-                          ? 'bg-rose-500 text-white animate-pulse'
-                          : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                      }`}
-                      title="Dictate with microphone"
+                      onClick={() => setIsAskModalOpen(false)}
+                      className="px-4 py-2 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100 transition"
                     >
-                      {state.isRecordingSpeech ? (
-                        <>
-                          <MicOff className="w-3.5 h-3.5" />
-                          <span>Listening...</span>
-                        </>
-                      ) : (
-                        <>
-                          <Mic className="w-3.5 h-3.5 text-blue-600" />
-                          <span>Dictate</span>
-                        </>
-                      )}
+                      {t('worker_detail.cancel')}
                     </button>
-                    <span className="text-slate-400 font-medium">
-                      {questionText.length} / 300
-                    </span>
+                    <button
+                      id="btn-submit-worker-question"
+                      type="submit"
+                      disabled={!questionText.trim()}
+                      className="px-5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white font-bold text-xs shadow-xs transition flex items-center gap-1.5"
+                    >
+                      <span>{t('worker_detail.send_question')}</span>
+                      <Send className="w-3.5 h-3.5" />
+                    </button>
                   </div>
-                </div>
-
-                {/* Privacy Lock Banner */}
-                <div className="bg-blue-50/70 border border-blue-200/80 rounded-xl p-2.5 flex items-start gap-2">
-                  <Lock className="w-3.5 h-3.5 text-blue-600 shrink-0 mt-0.5" />
-                  <p className="text-[11px] text-blue-900 leading-snug">
-                    Private to An (Team lead) · Task status will show <strong>Needs clarification</strong> so everyone stays aligned.
-                  </p>
-                </div>
-
-                {/* Action Buttons */}
-                <div className="flex items-center justify-end gap-2.5 pt-2 border-t border-slate-100">
-                  <button
-                    type="button"
-                    onClick={() => setIsAskModalOpen(false)}
-                    className="px-4 py-2 bg-white hover:bg-slate-100 text-slate-700 text-xs font-semibold rounded-xl border border-slate-200 transition"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    id="btn-send-to-facilitator-modal"
-                    type="submit"
-                    disabled={!questionText.trim()}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white text-xs font-bold rounded-xl shadow-xs transition flex items-center gap-1.5"
-                  >
-                    <span>Send to facilitator</span>
-                    <Send className="w-3.5 h-3.5" />
-                  </button>
                 </div>
               </form>
             </div>

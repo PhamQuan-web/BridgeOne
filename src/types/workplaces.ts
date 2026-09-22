@@ -33,6 +33,7 @@ export interface WorkplaceTemplate {
   destinationLabel: string;
   steps: TaskStep[];
   typicalQuestions: string[];
+  typicalQuestionsEn?: string[];
 }
 
 export const WORKPLACE_TEMPLATES: Record<WorkplaceIndustry, WorkplaceTemplate> = {
@@ -119,6 +120,11 @@ export const WORKPLACE_TEMPLATES: Record<WorkplaceIndustry, WorkplaceTemplate> =
       'Khay A đã đầy. Có chuyển sang Khay B không?',
       'Thiếu tem dán QA màu xanh lá, lấy thêm ở đâu?',
       'Cáp dẹt hơi bị cấn góc, có tiếp tục đóng gói không?',
+    ],
+    typicalQuestionsEn: [
+      'Tray A is full. Should I switch to Tray B?',
+      'Missing green QA pass labels, where do I get more?',
+      'Ribbon cable is slightly bent at corner, proceed packing?',
     ],
   },
 

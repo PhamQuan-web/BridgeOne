@@ -77,11 +77,28 @@ export interface VersionHistoryItem {
   isCurrent?: boolean;
 }
 
+export interface AssignedLesson {
+  id: string;
+  titleVi: string;
+  titleEn: string;
+  category: 'sop' | 'safety' | 'inclusion';
+  assignedBy: string;
+  assignedAt: string;
+  targetWorker: string;
+  status: 'pending' | 'in_progress' | 'completed';
+  score?: number;
+  durationMinutes: number;
+  summaryVi: string;
+  summaryEn: string;
+  keySteps: string[];
+}
+
 export interface HandoffState {
   // Navigation & Lifecycle
   currentScreen: ScreenId;
   lifecycleStage: LifecycleStage;
   activePersona: 'worker' | 'facilitator';
+  isRightSidebarOpen: boolean;
 
   // Task Details
   taskId: string;
@@ -168,6 +185,9 @@ export interface HandoffState {
   }>;
   isLiveMicActive: boolean;
 
+  // Bi-directional Micro-Learning & Onboarding (ADC Stages 4-5-6)
+  assignedLessons: AssignedLesson[];
+
   // Demo assistant drawer
   isDemoDrawerOpen: boolean;
 
@@ -178,6 +198,14 @@ export interface HandoffState {
     direction: 'RIGHT' | 'LEFT' | 'BEHIND';
     timeToImpact: number;
     location: string;
+    timestamp: string;
+  } | null;
+
+  // Station Call Visual Alert (Stage 5 Operations: Quick Call & Visual Strobe)
+  stationCallAlert: {
+    caller: string;
+    station: string;
+    reason: string;
     timestamp: string;
   } | null;
 }

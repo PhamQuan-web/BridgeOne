@@ -1,9 +1,11 @@
 import React from 'react';
 import { useHandoff } from '../../context/HandoffContext';
+import { useLanguage } from '../../i18n/LanguageContext';
 import { Layers, User, Shield, ArrowLeftRight, CheckCircle2 } from 'lucide-react';
 
 export const Header: React.FC = () => {
   const { state, setScreen } = useHandoff();
+  const { isVi } = useLanguage();
 
   const isFacilitatorView =
     state.currentScreen === 'facilitator' || state.currentScreen === 'review_publish';
@@ -32,11 +34,11 @@ export const Header: React.FC = () => {
               <div className="flex items-center gap-2">
                 <span className="font-bold text-slate-900 text-lg tracking-tight">CÙNG NHỊP</span>
                 <span className="text-[10px] px-1.5 py-0.5 font-semibold bg-blue-50 text-blue-700 rounded-md border border-blue-200">
-                  Onboarding
+                  {isVi ? 'Hòa nhập' : 'Onboarding'}
                 </span>
               </div>
               <p className="text-xs text-slate-500 font-normal">
-                Accessible task handoff &amp; instruction alignment
+                {isVi ? 'Bàn giao tác vụ tiếp cận & đồng bộ chỉ dẫn' : 'Accessible task handoff & instruction alignment'}
               </p>
             </div>
           </button>
@@ -51,7 +53,7 @@ export const Header: React.FC = () => {
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
               }`}
             >
-              My Tasks
+              {isVi ? 'Nhiệm vụ của tôi' : 'My Tasks'}
             </button>
             <button
               onClick={() => setScreen('worker_detail')}
@@ -61,7 +63,7 @@ export const Header: React.FC = () => {
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
               }`}
             >
-              Active Task Detail
+              {isVi ? 'Chi tiết tác vụ' : 'Active Task Detail'}
             </button>
             <button
               onClick={() => setScreen('facilitator')}
@@ -71,7 +73,7 @@ export const Header: React.FC = () => {
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
               }`}
             >
-              Facilitator Workspace
+              {isVi ? 'Không gian Quản lý' : 'Facilitator Workspace'}
             </button>
             <button
               onClick={() => setScreen('published')}
@@ -81,7 +83,7 @@ export const Header: React.FC = () => {
                   : 'text-slate-600 hover:text-slate-900 hover:bg-slate-50'
               }`}
             >
-              Published SOP
+              {isVi ? 'Quy trình đã ban hành' : 'Published SOP'}
             </button>
           </nav>
         </div>
@@ -89,8 +91,8 @@ export const Header: React.FC = () => {
         {/* Right side: Role indicator and perspective switch */}
         <div className="flex items-center gap-3">
           <div className="hidden lg:flex flex-col text-right text-xs">
-            <span className="text-slate-400 font-medium">Work Area</span>
-            <span className="font-semibold text-slate-800">Assembly Line A · Shift 1</span>
+            <span className="text-slate-400 font-medium">{isVi ? 'Khu vực làm việc' : 'Work Area'}</span>
+            <span className="font-semibold text-slate-800">{isVi ? 'Dây chuyền A · Ca 1' : 'Assembly Line A · Shift 1'}</span>
           </div>
 
           <div className="h-8 w-px bg-slate-200 hidden lg:block" />
@@ -105,9 +107,9 @@ export const Header: React.FC = () => {
                 <div className="text-xs">
                   <div className="font-semibold text-slate-900 flex items-center gap-1">
                     <span>An</span>
-                    <span className="text-[10px] text-amber-700 font-medium bg-amber-100 px-1 rounded">Lead</span>
+                    <span className="text-[10px] text-amber-700 font-medium bg-amber-100 px-1 rounded">{isVi ? 'Chuyền trưởng' : 'Lead'}</span>
                   </div>
-                  <span className="text-slate-500 text-[11px]">Task Facilitator</span>
+                  <span className="text-slate-500 text-[11px]">{isVi ? 'Điều phối viên tác vụ' : 'Task Facilitator'}</span>
                 </div>
               </>
             ) : (
@@ -118,9 +120,9 @@ export const Header: React.FC = () => {
                 <div className="text-xs">
                   <div className="font-semibold text-slate-900 flex items-center gap-1">
                     <span>Minh</span>
-                    <span className="text-[10px] text-blue-700 font-medium bg-blue-100 px-1 rounded">Worker</span>
+                    <span className="text-[10px] text-blue-700 font-medium bg-blue-100 px-1 rounded">{isVi ? 'Nhân viên' : 'Worker'}</span>
                   </div>
-                  <span className="text-slate-500 text-[11px]">New team member</span>
+                  <span className="text-slate-500 text-[11px]">{isVi ? 'Thành viên mới' : 'New team member'}</span>
                 </div>
               </>
             )}
@@ -128,7 +130,7 @@ export const Header: React.FC = () => {
             <button
               onClick={toggleRoleView}
               className="ml-1 p-1 hover:bg-white rounded-full text-slate-400 hover:text-slate-700 transition"
-              title={`Switch perspective to ${isFacilitatorView ? 'Minh (Worker)' : 'An (Facilitator)'}`}
+              title={isVi ? `Chuyển góc nhìn sang ${isFacilitatorView ? 'Minh (Nhân viên)' : 'An (Điều phối viên)'}` : `Switch perspective to ${isFacilitatorView ? 'Minh (Worker)' : 'An (Facilitator)'}`}
             >
               <ArrowLeftRight className="w-3.5 h-3.5" />
             </button>

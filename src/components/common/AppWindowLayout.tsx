@@ -29,13 +29,14 @@ import {
   Sparkles,
   AlertCircle,
   Sliders,
+  Radio,
+  RotateCcw,
 } from 'lucide-react';
 import { ScreenId } from '../../types/handoff';
 
 export const AppWindowLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { state, setScreen, switchPersona, toggleDemoDrawer } = useHandoff();
+  const { state, setScreen, switchPersona, toggleDemoDrawer, toggleRightSidebar, setGoldenFlowState } = useHandoff();
   const { t } = useLanguage();
-  const [profileDropdownOpen, setProfileDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -53,9 +54,9 @@ export const AppWindowLayout: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-[#F8FAFC] text-slate-900">
+    <div className="h-screen max-h-screen w-screen overflow-hidden flex flex-col md:flex-row bg-[#F8FAFC] text-slate-900">
       {/* MOBILE TOP BAR */}
-      <header className="md:hidden bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between sticky top-0 z-30">
+      <header className="md:hidden bg-white border-b border-slate-200 px-4 py-3 flex items-center justify-between shrink-0 z-30">
         <button
           onClick={() => handleNavClick('home')}
           className="flex items-center gap-2 focus:outline-hidden"
@@ -90,11 +91,11 @@ export const AppWindowLayout: React.FC<{ children: React.ReactNode }> = ({ child
         </div>
       </header>
 
-      {/* LEFT SIDEBAR (Consolidated to Core Hubs, w-64, high-contrast, collapsible) */}
+      {/* LEFT SIDEBAR (Consolidated to Core Hubs, w-72, high-contrast, collapsible, fixed h-screen) */}
       <aside
-        className={`fixed inset-y-0 left-0 z-40 bg-white border-r border-slate-200/90 flex flex-col justify-between select-none transform transition-all duration-200 ease-in-out md:static ${
-          mobileMenuOpen ? 'translate-x-0 shadow-2xl w-64 p-4' : '-translate-x-full md:translate-x-0'
-        } ${isSidebarCollapsed ? 'md:w-18 md:p-3' : 'md:w-64 md:p-4'}`}
+        className={`fixed inset-y-0 left-0 z-40 bg-white border-r border-slate-200/90 flex flex-col justify-between select-none transform transition-all duration-200 ease-in-out md:static md:h-screen shrink-0 overflow-y-auto ${
+          mobileMenuOpen ? 'translate-x-0 shadow-2xl w-72 p-4' : '-translate-x-full md:translate-x-0'
+        } ${isSidebarCollapsed ? 'md:w-20 md:p-3' : 'md:w-72 md:p-4'}`}
       >
         <div className="space-y-6">
           {/* Logo */}
@@ -104,13 +105,7 @@ export const AppWindowLayout: React.FC<{ children: React.ReactNode }> = ({ child
               className="text-left focus:outline-hidden hover:opacity-90 transition block"
               title="BridgeOne"
             >
-              {isSidebarCollapsed ? (
-                <div className="w-11 h-11 rounded-xl bg-blue-600 flex items-center justify-center text-white font-black text-xl shadow-sm">
-                  B
-                </div>
-              ) : (
-                <CungNhipLogo />
-              )}
+              <CungNhipLogo compact={isSidebarCollapsed} />
             </button>
             <button
               onClick={() => setMobileMenuOpen(false)}
@@ -207,6 +202,20 @@ export const AppWindowLayout: React.FC<{ children: React.ReactNode }> = ({ child
                   {state.lifecycleStage === 'worker_sent' && (
                     <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse" />
                   )}
+                </button>
+
+                <button
+                  id="nav-lead-learning"
+                  onClick={() => handleNavClick('learning')}
+                  title={t('nav.learning', 'Học tập & Hỏi đáp AI')}
+                  className={`w-full min-h-[50px] flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'gap-3.5 px-3.5'} py-3 rounded-xl text-sm font-semibold transition ${
+                    state.currentScreen === 'learning'
+                      ? 'bg-blue-50 text-blue-700 font-bold shadow-2xs'
+                      : 'text-slate-600 hover:bg-slate-50 hover:text-slate-900'
+                  }`}
+                >
+                  <GraduationCap className={`w-5 h-5 shrink-0 ${state.currentScreen === 'learning' ? 'text-blue-600' : 'text-slate-400'}`} />
+                  {!isSidebarCollapsed && <span>{t('nav.learning_short', 'Học tập & AI')}</span>}
                 </button>
 
                 <button
@@ -319,7 +328,7 @@ export const AppWindowLayout: React.FC<{ children: React.ReactNode }> = ({ child
                 <button
                   id="nav-worker-learning"
                   onClick={() => handleNavClick('learning')}
-                  title={t('nav.learning', 'Đào tạo & Thủ ngữ VSL')}
+                  title={t('nav.learning', 'Học tập & Hỏi đáp AI')}
                   className={`w-full min-h-[50px] flex items-center ${isSidebarCollapsed ? 'justify-center px-0' : 'gap-3.5 px-3.5'} py-3 rounded-xl text-sm font-semibold transition ${
                     state.currentScreen === 'learning'
                       ? 'bg-blue-50 text-blue-700 font-bold shadow-2xs'
@@ -327,7 +336,7 @@ export const AppWindowLayout: React.FC<{ children: React.ReactNode }> = ({ child
                   }`}
                 >
                   <GraduationCap className={`w-5 h-5 shrink-0 ${state.currentScreen === 'learning' ? 'text-blue-600' : 'text-slate-400'}`} />
-                  {!isSidebarCollapsed && <span>{t('nav.learning', 'Đào tạo & VSL')}</span>}
+                  {!isSidebarCollapsed && <span>{t('nav.learning_short', 'Học tập & AI')}</span>}
                 </button>
 
                 <button
@@ -352,16 +361,8 @@ export const AppWindowLayout: React.FC<{ children: React.ReactNode }> = ({ child
         {!isSidebarCollapsed && (
           <div className="mt-6 border-t border-slate-100 pt-3">
             <WorkerIllustration
-              phrase={
-                isFacilitator
-                  ? 'Support people to succeed.'
-                  : 'Clear communication builds stronger teams.'
-              }
-              subphrase={
-                isFacilitator
-                  ? 'Better instructions, brighter tomorrows. Inclusive workplaces create opportunities for everyone.'
-                  : 'Inclusive workplaces create safer, stronger opportunities for everyone.'
-              }
+              phrase={isFacilitator ? t('brand.quote_lead') : t('brand.quote')}
+              subphrase={isFacilitator ? t('brand.quote_lead_sub') : t('brand.quote_sub')}
             />
           </div>
         )}
@@ -375,16 +376,16 @@ export const AppWindowLayout: React.FC<{ children: React.ReactNode }> = ({ child
         />
       )}
 
-      {/* MAIN CONTENT AREA */}
-      <section aria-label="Main Application View" className="flex-1 flex flex-col min-w-0 bg-[#F8FAFC]">
+      {/* MAIN CONTENT AREA: FIXED h-screen overflow-hidden */}
+      <section aria-label="Main Application View" className="flex-1 flex flex-col min-w-0 h-full max-h-screen overflow-hidden bg-[#F8FAFC]">
         {/* Top Product Bar: Search, Work Area, Notification Bell, User Persona Switcher */}
-        <header className="bg-white border-b border-slate-200/90 px-4 sm:px-6 py-3 flex items-center justify-between gap-4 sticky top-0 z-20">
+        <header className="shrink-0 bg-white border-b border-slate-200/90 px-4 sm:px-6 py-3 flex items-center justify-between gap-4 z-20">
           {/* Focus Mode Toggle & Search Bar */}
           <div className="flex-1 max-w-md flex items-center gap-2">
             <button
               onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
               className="hidden md:flex p-2 rounded-xl text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition border border-slate-200"
-              title={isSidebarCollapsed ? 'Mở rộng thanh bên (Focus Mode Tắt)' : 'Thu gọn thanh bên (Bật Focus Mode cho trạm làm việc)'}
+              title={isSidebarCollapsed ? t('header.focus_mode_expand') : t('header.focus_mode_collapse')}
             >
               {isSidebarCollapsed ? <PanelLeft className="w-5 h-5 text-blue-600" /> : <PanelLeftClose className="w-5 h-5" />}
             </button>
@@ -406,7 +407,7 @@ export const AppWindowLayout: React.FC<{ children: React.ReactNode }> = ({ child
 
           {/* Right Header Area: Language Switcher + Sightline LED status + Notification + Persona Switcher */}
           <div className="flex items-center gap-2.5 sm:gap-3">
-            {/* Instant Language Switcher (VI, EN, JA, KO, ZH) */}
+            {/* Instant Language Switcher (VI, EN) */}
             <LanguageSwitcher />
 
             {/* Visual Safety Beacon status (ADC Stage 6 Pillar 3) */}
@@ -414,21 +415,39 @@ export const AppWindowLayout: React.FC<{ children: React.ReactNode }> = ({ child
               <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
               <div className="text-left text-xs leading-none">
                 <span className="text-[9px] font-bold uppercase tracking-wider text-emerald-800 block">
-                  Pillar 3 Sightline
+                  {t('header.sightline_title')}
                 </span>
                 <span className="text-[11px] font-extrabold text-emerald-950">
-                  Corner LED Active
+                  {t('header.sightline_active')}
                 </span>
               </div>
             </div>
 
             <div className="h-6 w-px bg-slate-200 hidden xl:block" />
 
+            {/* Toggle Right Live Handoff Sidebar */}
+            <button
+              id="btn-toggle-right-sidebar"
+              onClick={toggleRightSidebar}
+              className={`p-1.5 sm:px-2.5 sm:py-1.5 rounded-xl transition border flex items-center gap-1.5 text-xs font-bold ${
+                state.isRightSidebarOpen
+                  ? 'bg-blue-50 text-blue-700 border-blue-200 shadow-2xs'
+                  : 'text-slate-600 hover:text-slate-900 bg-white hover:bg-slate-50 border-slate-200'
+              }`}
+              title={t('header.toggle_live_sidebar', 'Bật/tắt Kênh trực tiếp (STT / Phụ đề / TTS)')}
+            >
+              <Radio className={`w-4 h-4 ${state.isLiveMicActive ? 'text-rose-500 animate-pulse' : 'text-blue-600'}`} />
+              <span className="hidden lg:inline">{t('header.live_channel', 'Kênh Trực Tiếp')}</span>
+              {state.liveTranscriptLog.length > 0 && (
+                <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+              )}
+            </button>
+
             {/* Notification Bell */}
             <button
               onClick={() => handleNavClick(isFacilitator ? 'facilitator' : 'worker_detail')}
               className="relative p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-xl transition"
-              title="Notifications"
+              title={t('header.notifications')}
             >
               <Bell className="w-4 h-4" />
               {hasUnread && (
@@ -436,115 +455,100 @@ export const AppWindowLayout: React.FC<{ children: React.ReactNode }> = ({ child
               )}
             </button>
 
-            {/* Active Persona Switcher Pill */}
-            <div className="relative">
+            {/* DIRECT 1-CLICK PERSONA SWITCHER: MINH <-> AN (No hidden menu, zero-friction toggle) */}
+            <div className="flex items-center bg-slate-100 p-0.5 sm:p-1 rounded-xl border border-slate-200/90 shadow-2xs">
               <button
-                id="btn-persona-switcher"
-                onClick={() => setProfileDropdownOpen(!profileDropdownOpen)}
-                className="flex items-center gap-2 p-1.5 pr-2.5 rounded-full hover:bg-slate-100 border border-slate-200/90 bg-white transition shadow-2xs"
-                title="Switch active user perspective"
+                id="toggle-persona-worker"
+                type="button"
+                onClick={() => switchPersona('worker')}
+                className={`flex items-center gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg text-xs font-bold transition ${
+                  !isFacilitator
+                    ? 'bg-white text-blue-700 shadow-xs ring-1 ring-slate-200'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+                title="Chuyển sang góc nhìn Minh (Công nhân)"
               >
-                {isFacilitator ? (
-                  <AnAvatar size="w-7 h-7" />
-                ) : (
-                  <MinhAvatar size="w-7 h-7" name="M" />
-                )}
-
-                <div className="text-left hidden sm:block">
-                  <div className="text-xs font-bold text-slate-900 leading-tight flex items-center gap-1.5">
-                    <span>{isFacilitator ? 'An' : 'Minh'}</span>
-                    <span
-                      className={`text-[9px] px-1.5 py-0.2 rounded font-extrabold uppercase ${
-                        isFacilitator
-                          ? 'bg-amber-100 text-amber-800 border border-amber-300'
-                          : 'bg-blue-100 text-blue-800 border border-blue-300'
-                      }`}
-                    >
-                      {isFacilitator ? 'Lead' : 'Worker'}
-                    </span>
-                  </div>
-                  <div className="text-[10px] text-slate-500 font-medium leading-none mt-0.5">
-                    {isFacilitator ? 'Team lead' : 'New team member'}
-                  </div>
-                </div>
-
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400 ml-0.5" />
+                <MinhAvatar size="w-5 h-5" name="M" />
+                <span>Minh</span>
+                <span className="text-[10px] font-normal opacity-75 hidden xl:inline">({t('role.worker', 'Công nhân')})</span>
               </button>
 
-              {/* Persona Dropdown Menu */}
-              {profileDropdownOpen && (
-                <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-200 p-2 z-50 text-xs">
-                  <div className="px-3 py-2 border-b border-slate-100">
-                    <p className="font-bold text-slate-900">{t('persona.switch_title', 'Switch Perspective')}</p>
-                    <p className="text-[11px] text-slate-500">
-                      {t('persona.switch_desc', 'Experience reciprocal handoff as Worker or Facilitator')}
-                    </p>
-                  </div>
-
-                  <div className="py-1 space-y-1">
-                    {/* Worker Option */}
-                    <button
-                      onClick={() => {
-                        switchPersona('worker');
-                        setProfileDropdownOpen(false);
-                      }}
-                      className={`w-full text-left p-2.5 rounded-xl transition flex items-center justify-between ${
-                        !isFacilitator ? 'bg-blue-50 text-blue-950 font-bold' : 'hover:bg-slate-50 text-slate-700'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <MinhAvatar size="w-7 h-7" name="M" />
-                        <div>
-                          <span className="block font-bold">Minh</span>
-                          <span className="text-[10px] text-slate-500">
-                            {t('role.worker', 'Worker')} · {t('persona.worker_title', 'New team member')}
-                          </span>
-                        </div>
-                      </div>
-                      {!isFacilitator && (
-                        <span className="text-[10px] font-bold text-blue-600 bg-blue-100 px-1.5 py-0.5 rounded">
-                          {t('persona.active', 'Active')}
-                        </span>
-                      )}
-                    </button>
-
-                    {/* Facilitator Option */}
-                    <button
-                      onClick={() => {
-                        switchPersona('facilitator');
-                        setProfileDropdownOpen(false);
-                      }}
-                      className={`w-full text-left p-2.5 rounded-xl transition flex items-center justify-between ${
-                        isFacilitator ? 'bg-amber-50 text-amber-950 font-bold' : 'hover:bg-slate-50 text-slate-700'
-                      }`}
-                    >
-                      <div className="flex items-center gap-2.5">
-                        <AnAvatar size="w-7 h-7" />
-                        <div>
-                          <span className="block font-bold">An</span>
-                          <span className="text-[10px] text-slate-500">
-                            {t('role.lead', 'Lead')} · {t('persona.lead_title', 'Team lead')}
-                          </span>
-                        </div>
-                      </div>
-                      {isFacilitator && (
-                        <span className="text-[10px] font-bold text-amber-700 bg-amber-100 px-1.5 py-0.5 rounded">
-                          {t('persona.active', 'Active')}
-                        </span>
-                      )}
-                    </button>
-                  </div>
-                </div>
-              )}
+              <button
+                id="toggle-persona-facilitator"
+                type="button"
+                onClick={() => switchPersona('facilitator')}
+                className={`flex items-center gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg text-xs font-bold transition ${
+                  isFacilitator
+                    ? 'bg-white text-amber-900 shadow-xs ring-1 ring-amber-300'
+                    : 'text-slate-600 hover:text-slate-900'
+                }`}
+                title="Chuyển sang góc nhìn An (Quản lý chuyền)"
+              >
+                <AnAvatar size="w-5 h-5" />
+                <span>An</span>
+                <span className="text-[10px] font-normal opacity-75 hidden xl:inline">({t('role.lead', 'Quản lý')})</span>
+              </button>
             </div>
+
+            {/* Quick Reset Flow Button (Shortcut: Option+1) */}
+            <button
+              id="btn-quick-reset-shot2"
+              onClick={() => setGoldenFlowState(1)}
+              className="p-1.5 sm:px-2 sm:py-1.5 rounded-xl border border-amber-200 bg-amber-50 hover:bg-amber-100 text-amber-900 transition flex items-center gap-1 text-xs font-bold shadow-2xs"
+              title="Khôi phục trạng thái ban đầu (Khay A) để quay Shot 2 (Phím tắt: Option+1)"
+            >
+              <RotateCcw className="w-3.5 h-3.5 text-amber-700" />
+              <span className="hidden xl:inline">Làm lại Shot 2</span>
+            </button>
           </div>
         </header>
 
-        {/* Dynamic Screen View */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto pb-24">{children}</main>
+        {/* 3-COLUMN ARCHITECTURE: Center Workspace + Right Live Handoff Sidebar */}
+        <div className="flex-1 flex min-h-0 overflow-hidden relative">
+          {/* CENTER WORKSPACE: 100% unobstructed, responsive, clean */}
+          <main className="flex-1 min-w-0 overflow-y-auto p-4 sm:p-6 lg:p-7">
+            <div className="max-w-7xl mx-auto w-full">
+              {children}
+            </div>
+          </main>
 
-        {/* Universal Persistent Live Conversation (STT/TTS and AI shift catch-up across all screens) */}
-        <PersistentLiveConversation />
+          {/* DESKTOP RIGHT LIVE HANDOFF SIDEBAR (Teams-style live STT & reciprocal dialogue) */}
+          {state.isRightSidebarOpen && (
+            <aside
+              aria-label="Live Handoff Sidebar"
+              className="hidden md:flex w-80 lg:w-92 xl:w-[410px] shrink-0 border-l border-slate-200/90 bg-white flex-col h-full z-20 transition-all duration-200"
+            >
+              <PersistentLiveConversation isSidebarMode onClose={toggleRightSidebar} />
+            </aside>
+          )}
+        </div>
+
+        {/* MOBILE SLIDE-OVER SHEET FOR RIGHT LIVE HANDOFF SIDEBAR */}
+        {state.isRightSidebarOpen && (
+          <div className="md:hidden fixed inset-0 z-50 flex justify-end">
+            <div
+              className="fixed inset-0 bg-slate-950/40 backdrop-blur-xs"
+              onClick={toggleRightSidebar}
+            />
+            <div className="relative w-full max-w-sm bg-white h-full shadow-2xl flex flex-col z-10 animate-in slide-in-from-right duration-200">
+              <PersistentLiveConversation isSidebarMode onClose={toggleRightSidebar} />
+            </div>
+          </div>
+        )}
+
+        {/* FLOATING RE-OPEN PILL IF SIDEBAR IS CLOSED */}
+        {!state.isRightSidebarOpen && (
+          <button
+            type="button"
+            onClick={toggleRightSidebar}
+            className="fixed bottom-4 right-4 z-30 px-3.5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-2xl shadow-xl flex items-center gap-2 text-xs font-extrabold transition border border-blue-500/30 animate-in fade-in"
+            title={t('header.toggle_live_sidebar', 'Bật/tắt Kênh trực tiếp')}
+          >
+            <Radio className="w-4 h-4 text-emerald-300 animate-pulse" />
+            <span>{t('header.live_channel', 'Kênh Trực Tiếp')}</span>
+            <span className="w-2 h-2 rounded-full bg-emerald-400" />
+          </button>
+        )}
       </section>
     </div>
   );

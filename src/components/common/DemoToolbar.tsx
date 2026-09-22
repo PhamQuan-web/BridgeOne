@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { useHandoff } from '../../context/HandoffContext';
+import { useLanguage } from '../../i18n/LanguageContext';
 import { ScreenId } from '../../types/handoff';
 import {
   RotateCcw,
@@ -25,6 +26,7 @@ export const DemoToolbar: React.FC = () => {
     setGoldenFlowState,
     triggerSafetyAlert,
   } = useHandoff();
+  const { isVi } = useLanguage();
 
   // Keyboard shortcuts:
   // Alt + D: toggle drawer
@@ -64,19 +66,19 @@ export const DemoToolbar: React.FC = () => {
   }, [state.isDemoDrawerOpen, toggleDemoDrawer, setDemoDrawerOpen, setGoldenFlowState, resetDemo]);
 
   const screens: { id: ScreenId; label: string; number: string }[] = [
-    { id: 'home', label: '1. Home Dashboard', number: '1' },
-    { id: 'tasks', label: '2. My Tasks Hub (Line A)', number: '2' },
-    { id: 'worker_detail', label: '3. Task Detail (INS-1042)', number: '3' },
-    { id: 'ask_suggest', label: '4. Ask or Suggest', number: '4' },
-    { id: 'facilitator', label: '5. Lead Workspace (An)', number: '5' },
-    { id: 'review_publish', label: '6. Review & Publish', number: '6' },
-    { id: 'published', label: '7. Published SOP', number: '7' },
-    { id: 'accountability', label: '8. Workplace Justice & Career', number: '8' },
-    { id: 'messages', label: '9. Handoff Messages', number: '9' },
-    { id: 'learning', label: '10. Safety & Micro-learning', number: '10' },
-    { id: 'team', label: '11. Inclusive Team (Line A)', number: '11' },
-    { id: 'resources', label: '12. SOP & Policy Hub', number: '12' },
-    { id: 'settings', label: '13. Accessibility / UD', number: '13' },
+    { id: 'home', label: isVi ? '1. Trang chủ tổng quan' : '1. Home Dashboard', number: '1' },
+    { id: 'tasks', label: isVi ? '2. Danh mục nhiệm vụ (Chuyền A)' : '2. My Tasks Hub (Line A)', number: '2' },
+    { id: 'worker_detail', label: isVi ? '3. Chi tiết tác vụ (INS-1042)' : '3. Task Detail (INS-1042)', number: '3' },
+    { id: 'ask_suggest', label: isVi ? '4. Hỏi hoặc Đề xuất' : '4. Ask or Suggest', number: '4' },
+    { id: 'facilitator', label: isVi ? '5. Không gian Trưởng nhóm (An)' : '5. Lead Workspace (An)', number: '5' },
+    { id: 'review_publish', label: isVi ? '6. Rà soát & Xuất bản' : '6. Review & Publish', number: '6' },
+    { id: 'published', label: isVi ? '7. SOP đã xuất bản' : '7. Published SOP', number: '7' },
+    { id: 'accountability', label: isVi ? '8. Công bằng & Hồ sơ năng lực' : '8. Workplace Justice & Career', number: '8' },
+    { id: 'messages', label: isVi ? '9. Tin nhắn bàn giao' : '9. Handoff Messages', number: '9' },
+    { id: 'learning', label: isVi ? '10. An toàn & Học vi mô' : '10. Safety & Micro-learning', number: '10' },
+    { id: 'team', label: isVi ? '11. Đội ngũ hòa nhập (Chuyền A)' : '11. Inclusive Team (Line A)', number: '11' },
+    { id: 'resources', label: isVi ? '12. Kho lưu trữ SOP & Chính sách' : '12. SOP & Policy Hub', number: '12' },
+    { id: 'settings', label: isVi ? '13. Trợ năng / Thiết kế phổ quát' : '13. Accessibility / UD', number: '13' },
   ];
 
   return (
@@ -106,7 +108,7 @@ export const DemoToolbar: React.FC = () => {
                 </div>
                 <div>
                   <h2 id="demo-assistant-title" className="font-extrabold text-sm text-slate-950">
-                    Submission Demo Assistant
+                    {isVi ? 'Trợ lý Trình diễn Bài thi' : 'Submission Demo Assistant'}
                   </h2>
                   <p className="text-[11px] text-slate-500">
                     Cùng Nhịp · ADC Hackathon 2026 Golden Flow
@@ -117,7 +119,7 @@ export const DemoToolbar: React.FC = () => {
                 id="btn-close-demo-assistant"
                 onClick={() => setDemoDrawerOpen(false)}
                 className="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200 flex items-center justify-center transition"
-                title="Close drawer (Esc)"
+                title={isVi ? 'Đóng ngăn kéo (Esc)' : 'Close drawer (Esc)'}
               >
                 <X className="w-4 h-4" />
               </button>
@@ -130,10 +132,10 @@ export const DemoToolbar: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5 font-extrabold text-slate-950 text-xs uppercase tracking-wide">
                     <Zap className="w-4 h-4 text-amber-500" />
-                    <span>The Golden Flow (3 Trạng thái)</span>
+                    <span>{isVi ? 'The Golden Flow (3 Trạng thái)' : 'The Golden Flow (3 States)'}</span>
                   </div>
                   <span className="text-[10px] font-bold bg-amber-100 text-amber-900 px-2 py-0.5 rounded-full border border-amber-300">
-                    Quay video demo
+                    {isVi ? 'Quay video demo' : 'Record demo video'}
                   </span>
                 </div>
 
@@ -157,7 +159,7 @@ export const DemoToolbar: React.FC = () => {
                           1
                         </span>
                         <span className="font-extrabold text-slate-900 group-hover:text-blue-700">
-                          Nhận việc &amp; Khay A đầy
+                          {isVi ? 'Nhận việc & Khay A đầy' : 'Task Assigned & Tray A Full'}
                         </span>
                       </div>
                       <span className="font-mono text-[10px] text-slate-400 bg-white px-1.5 py-0.5 rounded border border-slate-200">
@@ -165,7 +167,11 @@ export const DemoToolbar: React.FC = () => {
                       </span>
                     </div>
                     <p className="text-[11px] text-slate-600 mt-1.5 leading-snug">
-                      Minh mở task <strong>&ldquo;Pack finished assemblies&rdquo; (INS-1042)</strong>. Thấy Bước 2 ghi <strong>&ldquo;Tray A&rdquo;</strong>, nhưng khay A thực tế đã đầy.
+                      {isVi ? (
+                        <>Minh mở task <strong>“Pack finished assemblies” (INS-1042)</strong>. Thấy Bước 2 ghi <strong>“Khay A”</strong>, nhưng khay A thực tế đã đầy.</>
+                      ) : (
+                        <>Minh opens task <strong>“Pack finished assemblies” (INS-1042)</strong>. Sees Step 2 directs to <strong>“Tray A”</strong>, but Tray A is already full.</>
+                      )}
                     </p>
                   </button>
 
@@ -188,7 +194,7 @@ export const DemoToolbar: React.FC = () => {
                           2
                         </span>
                         <span className="font-extrabold text-slate-900 group-hover:text-rose-700 flex items-center gap-1.5">
-                          <span>In-task Clarification &amp; Cờ đỏ</span>
+                          <span>{isVi ? 'In-task Clarification & Cờ đỏ' : 'In-task Clarification & Red Flag'}</span>
                           <Flag className="w-3.5 h-3.5 text-rose-500" />
                         </span>
                       </div>
@@ -197,7 +203,11 @@ export const DemoToolbar: React.FC = () => {
                       </span>
                     </div>
                     <p className="text-[11px] text-slate-600 mt-1.5 leading-snug">
-                      Minh hỏi: <em>&ldquo;Can we use Tray B instead of Tray A for high-volume units?&rdquo;</em>. Task lập tức gắn cờ <strong>&ldquo;Needs clarification&rdquo;</strong>.
+                      {isVi ? (
+                        <>Minh hỏi: <em>“Can we use Tray B instead of Tray A for high-volume units?”</em>. Task lập tức gắn cờ <strong>“Needs clarification”</strong>.</>
+                      ) : (
+                        <>Minh asks: <em>“Can we use Tray B instead of Tray A for high-volume units?”</em>. Task immediately flagged with <strong>“Needs clarification”</strong>.</>
+                      )}
                     </p>
                   </button>
 
@@ -220,7 +230,7 @@ export const DemoToolbar: React.FC = () => {
                           3
                         </span>
                         <span className="font-extrabold text-slate-900 group-hover:text-emerald-700 flex items-center gap-1.5">
-                          <span>An duyệt &amp; Tem bằng chứng</span>
+                          <span>{isVi ? 'An duyệt & Tem bằng chứng' : 'Lead Approved & Provenance Stamp'}</span>
                           <ShieldCheck className="w-3.5 h-3.5 text-emerald-600" />
                         </span>
                       </div>
@@ -229,7 +239,11 @@ export const DemoToolbar: React.FC = () => {
                       </span>
                     </div>
                     <p className="text-[11px] text-slate-600 mt-1.5 leading-snug">
-                      An phản hồi đồng ý. Bước 2 viền xanh highlight đổi thành <strong>&ldquo;Place in tray Tray B&rdquo;</strong> kèm badge <strong>[Updated]</strong> và tem: <strong>&ldquo;✔ Verified by An (Lead) · Provenance: Worker Question Handoff&rdquo;</strong>.
+                      {isVi ? (
+                        <>An phản hồi đồng ý. Bước 2 viền xanh highlight đổi thành <strong>“Đặt vào khay Khay B”</strong> kèm badge <strong>[Đã cập nhật]</strong> và tem: <strong>“✔ Đã xác minh bởi An (Trưởng nhóm) · Nguồn gốc: Bàn giao câu hỏi nhân viên”</strong>.</>
+                      ) : (
+                        <>An replies and approves. Step 2 highlighted in green and updated to <strong>“Place in tray Tray B”</strong> with <strong>[Updated]</strong> badge and stamp: <strong>“✔ Verified by An (Lead) · Provenance: Worker Question Handoff”</strong>.</>
+                      )}
                     </p>
                   </button>
 
@@ -248,7 +262,7 @@ export const DemoToolbar: React.FC = () => {
                           4
                         </span>
                         <span className="font-extrabold text-rose-900 group-hover:text-rose-950 flex items-center gap-1.5">
-                          <span>Module 2: Cảnh báo Góc mù</span>
+                          <span>{isVi ? 'Module 2: Cảnh báo Góc mù' : 'Module 2: Blind-Corner Alert'}</span>
                           <span className="text-[10px] bg-rose-200 text-rose-800 px-1.5 py-0.2 rounded font-bold">New</span>
                         </span>
                       </div>
@@ -257,7 +271,11 @@ export const DemoToolbar: React.FC = () => {
                       </span>
                     </div>
                     <p className="text-[11px] text-rose-800 mt-1.5 leading-snug">
-                      Kích hoạt mô phỏng camera AI phát hiện xe đẩy hàng tiếp cận góc khuất: Bật cảnh báo rung điện thoại và banner chỉ hướng <strong>[BÊN PHẢI]</strong> đếm lùi 3 giây né tránh an toàn.
+                      {isVi ? (
+                        <>Kích hoạt mô phỏng camera AI phát hiện xe đẩy hàng tiếp cận góc khuất: Bật cảnh báo rung điện thoại và banner chỉ hướng <strong>[BÊN PHẢI]</strong> đếm lùi 3 giây né tránh an toàn.</>
+                      ) : (
+                        <>Triggers simulated AI camera detecting approaching hand-trolley at blind corner: Activates haptic alert and directional banner <strong>[RIGHT SIDE]</strong> with 3s countdown for safe evasion.</>
+                      )}
                     </p>
                   </button>
                 </div>
@@ -266,7 +284,7 @@ export const DemoToolbar: React.FC = () => {
               {/* Persona Switcher */}
               <div className="space-y-2 pt-2 border-t border-slate-100">
                 <span className="font-extrabold text-slate-900 text-xs uppercase tracking-wide block">
-                  Switch Active Perspective
+                  {isVi ? 'Chuyển Đổi Góc Nhìn Người Dùng' : 'Switch Active Perspective'}
                 </span>
                 <div className="grid grid-cols-2 gap-2">
                   <button
@@ -285,7 +303,9 @@ export const DemoToolbar: React.FC = () => {
                     </div>
                     <div>
                       <span className="block font-bold">Minh</span>
-                      <span className="text-[10px] text-slate-500">Worker View</span>
+                      <span className="text-[10px] text-slate-500">
+                        {isVi ? 'Góc nhìn Nhân viên' : 'Worker View'}
+                      </span>
                     </div>
                   </button>
 
@@ -305,7 +325,9 @@ export const DemoToolbar: React.FC = () => {
                     </div>
                     <div>
                       <span className="block font-bold">An</span>
-                      <span className="text-[10px] text-slate-500">Lead View</span>
+                      <span className="text-[10px] text-slate-500">
+                        {isVi ? 'Góc nhìn Trưởng nhóm' : 'Lead View'}
+                      </span>
                     </div>
                   </button>
                 </div>
@@ -314,7 +336,7 @@ export const DemoToolbar: React.FC = () => {
               {/* Screen Direct Access */}
               <div className="space-y-2 pt-2 border-t border-slate-100">
                 <span className="font-extrabold text-slate-900 text-xs uppercase tracking-wide block">
-                  All 6 Core Screens
+                  {isVi ? 'Tất cả các màn hình' : 'All Core Screens'}
                 </span>
                 <div className="grid grid-cols-2 gap-1.5">
                   {screens.map((s) => (
@@ -348,7 +370,7 @@ export const DemoToolbar: React.FC = () => {
                 className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-300 hover:bg-white text-slate-700 font-bold transition shadow-2xs"
               >
                 <RotateCcw className="w-3.5 h-3.5 text-slate-500" />
-                <span>Reset (Alt+R)</span>
+                <span>{isVi ? 'Đặt lại (Alt+R)' : 'Reset (Alt+R)'}</span>
               </button>
 
               <span className="text-[11px] text-slate-400 font-medium">

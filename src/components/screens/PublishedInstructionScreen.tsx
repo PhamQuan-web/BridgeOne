@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useHandoff } from '../../context/HandoffContext';
+import { useLanguage } from '../../i18n/LanguageContext';
 import { RealisticPhoto } from '../common/RealisticPhotos';
 import { AnAvatar, MinhAvatar, BotanicalCorner } from '../common/BrandGraphics';
 import {
@@ -20,13 +21,15 @@ import {
 
 export const PublishedInstructionScreen: React.FC = () => {
   const { state, setScreen, playTextToSpeech } = useHandoff();
+  const { t, isVi } = useLanguage();
   const [askModalOpen, setAskModalOpen] = useState(false);
   const [followUpText, setFollowUpText] = useState('');
   const [followUpSent, setFollowUpSent] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
 
-  const fullInstructionText =
-    "Pack finished units. Step 1: Check unit is complete. Step 2: Gently place the finished unit in Tray B. Step 3: Attach green Completed label. Step 4: Take Tray B to the staging rack.";
+  const fullInstructionText = isVi
+    ? "Đóng gói linh kiện hoàn tất. Bước 1: Kiểm tra bo mạch hoàn chỉnh. Bước 2: Nhẹ nhàng đặt cụm linh kiện vào Khay B. Bước 3: Dán nhãn xanh Completed. Bước 4: Chuyển Khay B sang kệ trung gian."
+    : "Pack finished units. Step 1: Check unit is complete. Step 2: Gently place the finished unit in Tray B. Step 3: Attach green Completed label. Step 4: Take Tray B to the staging rack.";
 
   const handleSendFollowUp = (e: React.FormEvent) => {
     e.preventDefault();
@@ -53,7 +56,7 @@ export const PublishedInstructionScreen: React.FC = () => {
           className="flex items-center gap-2 text-xs font-bold text-slate-600 hover:text-slate-900 transition"
         >
           <ArrowLeft className="w-4 h-4" />
-          <span>Back to instructions</span>
+          <span>{isVi ? 'Quay lại danh sách quy trình' : 'Back to instructions'}</span>
         </button>
       </div>
 
@@ -65,22 +68,22 @@ export const PublishedInstructionScreen: React.FC = () => {
           <div className="space-y-3">
             <div className="flex flex-wrap items-center gap-2">
               <span className="px-2.5 py-0.5 rounded-full text-[11px] font-extrabold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                PUBLISHED
+                {isVi ? 'ĐÃ XUẤT BẢN' : 'PUBLISHED'}
               </span>
               <span className="px-2.5 py-0.5 rounded-full text-[11px] font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-                Assembly Line A
+                {isVi ? 'Dây chuyền A' : 'Assembly Line A'}
               </span>
               <span className="text-xs text-slate-400 font-medium">INS-1042</span>
             </div>
 
             <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-2">
               <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-950 tracking-tight">
-                Pack finished assemblies
+                {isVi ? 'Đóng gói cụm linh kiện hoàn tất' : 'Pack finished assemblies'}
               </h1>
               {/* Cursive quote */}
               <div className="flex items-center gap-1 transform rotate-[-2deg]">
                 <span className="font-handwriting text-blue-600 text-xl font-bold">
-                  Clear instructions, smooth operations.
+                  {isVi ? 'Chỉ dẫn rõ ràng, vận hành trơn tru.' : 'Clear instructions, smooth operations.'}
                 </span>
                 <div className="text-emerald-500 flex gap-0.5 ml-1">
                   <span className="font-bold text-xs">/</span>
@@ -91,45 +94,24 @@ export const PublishedInstructionScreen: React.FC = () => {
             </div>
 
             <p className="text-sm text-slate-600 font-medium">
-              Pack completed units into the correct tray for next stage.
+              {isVi
+                ? 'Đóng gói linh kiện hoàn tất vào đúng khay để chuyển sang công đoạn kế tiếp.'
+                : 'Pack completed units into the correct tray for next stage.'}
             </p>
 
             {/* Meta tags & TTS audio */}
             <div className="flex flex-wrap items-center gap-2.5 pt-1 text-xs text-slate-600">
               <span className="px-3 py-1 bg-white border border-slate-200 rounded-lg font-semibold text-slate-800 shadow-2xs">
-                Medium
+                {isVi ? 'Độ khó: Vừa phải' : 'Medium'}
               </span>
               <span className="px-3 py-1 bg-white border border-slate-200 rounded-lg font-medium text-slate-600 flex items-center gap-1.5 shadow-2xs">
                 <Clock className="w-3.5 h-3.5 text-slate-400" />
-                ~ 5 minutes
+                {isVi ? '~ 5 phút' : '~ 5 minutes'}
               </span>
               <span className="px-3 py-1 bg-white border border-slate-200 rounded-lg font-medium text-slate-600 shadow-2xs">
-                Standard Work
+                {isVi ? 'Quy trình chuẩn' : 'Standard Work'}
               </span>
 
-              {/* Text to Speech Button */}
-              <button
-                id="btn-published-tts"
-                onClick={() => playTextToSpeech(fullInstructionText)}
-                className={`px-3 py-1 rounded-lg font-semibold text-xs transition flex items-center gap-1.5 shadow-2xs border ${
-                  state.ttsPlaying
-                    ? 'bg-blue-600 text-white border-blue-600 animate-pulse'
-                    : 'bg-white hover:bg-slate-50 text-blue-700 border-blue-200'
-                }`}
-                title="Read aloud instructions"
-              >
-                {state.ttsPlaying ? (
-                  <>
-                    <VolumeX className="w-3.5 h-3.5" />
-                    <span>Stop audio</span>
-                  </>
-                ) : (
-                  <>
-                    <Volume2 className="w-3.5 h-3.5 text-blue-600" />
-                    <span>Read aloud</span>
-                  </>
-                )}
-              </button>
             </div>
           </div>
 
@@ -140,10 +122,14 @@ export const PublishedInstructionScreen: React.FC = () => {
             </div>
             <div className="space-y-0.5">
               <h3 className="font-extrabold text-xs text-emerald-950">
-                This instruction is live and published.
+                {isVi
+                  ? 'Quy trình này đã được phát hành và có hiệu lực chính thức.'
+                  : 'This instruction is live and published.'}
               </h3>
               <p className="text-xs text-emerald-900 leading-relaxed">
-                Version 2.0 was verified and published today by An (Team lead). Changes from Minh&apos;s feedback have been incorporated atomically.
+                {isVi
+                  ? 'Phiên bản 2.0 đã được xác minh và xuất bản hôm nay bởi Quản lý An. Các chỉnh sửa từ phản ánh của Minh đã được cập nhật đồng bộ.'
+                  : "Version 2.0 was verified and published today by An (Team lead). Changes from Minh's feedback have been incorporated atomically."}
               </p>
             </div>
           </div>
@@ -151,7 +137,7 @@ export const PublishedInstructionScreen: React.FC = () => {
           {/* Steps Card */}
           <div className="bg-white rounded-2xl p-5 sm:p-6 border border-slate-200/90 shadow-xs space-y-4">
             <h2 className="text-sm font-extrabold text-slate-900 border-b border-slate-100 pb-3">
-              Steps (4)
+              {isVi ? 'Các bước thực hiện (4)' : 'Steps (4)'}
             </h2>
 
             <div className="space-y-4">
@@ -163,10 +149,12 @@ export const PublishedInstructionScreen: React.FC = () => {
                   </div>
                   <div className="space-y-1">
                     <h3 className="font-bold text-sm text-slate-900">
-                      Check unit is complete
+                      {isVi ? 'Kiểm tra cụm bo mạch hoàn chỉnh' : 'Check unit is complete'}
                     </h3>
                     <p className="text-xs text-slate-600 leading-relaxed">
-                      Make sure all components are securely attached and no parts are loose.
+                      {isVi
+                        ? 'Đảm bảo tất cả linh kiện được gắn chặt và không có chi tiết nào bị lỏng lẻo.'
+                        : 'Make sure all components are securely attached and no parts are loose.'}
                     </p>
                   </div>
                 </div>
@@ -184,14 +172,18 @@ export const PublishedInstructionScreen: React.FC = () => {
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <h3 className="font-bold text-sm text-slate-900">
-                        Place in tray
+                        {isVi ? 'Đặt linh kiện vào khay' : 'Place in tray'}
                       </h3>
                       <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
-                        ✓ Updated
+                        {isVi ? '✓ Đã cập nhật' : '✓ Updated'}
                       </span>
                     </div>
                     <p className="text-xs text-slate-800 leading-relaxed">
-                      Gently place the finished unit in <strong className="text-blue-700 font-bold underline">Tray B</strong>.
+                      {isVi ? (
+                        <>Nhẹ nhàng đặt cụm linh kiện đã hoàn thành vào <strong className="text-blue-700 font-bold underline">Khay B</strong>.</>
+                      ) : (
+                        <>Gently place the finished unit in <strong className="text-blue-700 font-bold underline">Tray B</strong>.</>
+                      )}
                     </p>
                   </div>
                 </div>
@@ -208,10 +200,12 @@ export const PublishedInstructionScreen: React.FC = () => {
                   </div>
                   <div className="space-y-1">
                     <h3 className="font-bold text-sm text-slate-900">
-                      Add label
+                      {isVi ? 'Dán nhãn hoàn tất' : 'Add label'}
                     </h3>
                     <p className="text-xs text-slate-600 leading-relaxed">
-                      Attach a green &ldquo;Completed&rdquo; label to the top of the unit.
+                      {isVi
+                        ? 'Dán nhãn xanh "Completed" lên mặt trên của cụm bo mạch.'
+                        : 'Attach a green "Completed" label to the top of the unit.'}
                     </p>
                   </div>
                 </div>
@@ -228,10 +222,14 @@ export const PublishedInstructionScreen: React.FC = () => {
                   </div>
                   <div className="space-y-1">
                     <h3 className="font-bold text-sm text-slate-900">
-                      Move to next stage
+                      {isVi ? 'Chuyển sang công đoạn kế tiếp' : 'Move to next stage'}
                     </h3>
                     <p className="text-xs text-slate-600 leading-relaxed">
-                      Take <strong className="text-blue-700 font-bold">Tray B</strong> to the staging rack.
+                      {isVi ? (
+                        <>Chuyển <strong className="text-blue-700 font-bold">Khay B</strong> sang kệ đệm trung gian Dây chuyền A.</>
+                      ) : (
+                        <>Take <strong className="text-blue-700 font-bold">Tray B</strong> to the staging rack.</>
+                      )}
                     </p>
                   </div>
                 </div>
@@ -248,29 +246,29 @@ export const PublishedInstructionScreen: React.FC = () => {
           {/* Card 1: Instruction details */}
           <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs space-y-4">
             <h3 className="font-extrabold text-xs text-slate-900 uppercase tracking-wide">
-              Instruction details
+              {isVi ? 'Thông tin quy trình' : 'Instruction details'}
             </h3>
 
             <div className="space-y-2 text-xs">
               <div className="flex items-center justify-between py-1 border-b border-slate-100">
-                <span className="text-slate-500">Version</span>
-                <span className="font-bold text-slate-900">2.0 (Latest)</span>
+                <span className="text-slate-500">{isVi ? 'Phiên bản' : 'Version'}</span>
+                <span className="font-bold text-slate-900">{isVi ? '2.0 (Mới nhất)' : '2.0 (Latest)'}</span>
               </div>
               <div className="flex items-center justify-between py-1 border-b border-slate-100">
-                <span className="text-slate-500">Published</span>
-                <span className="font-semibold text-slate-800">Today at 10:24 AM</span>
+                <span className="text-slate-500">{isVi ? 'Thời gian xuất bản' : 'Published'}</span>
+                <span className="font-semibold text-slate-800">{isVi ? 'Hôm nay lúc 10:24 AM' : 'Today at 10:24 AM'}</span>
               </div>
               <div className="flex items-center justify-between py-1 border-b border-slate-100">
-                <span className="text-slate-500">Facilitator</span>
-                <span className="font-bold text-slate-900">An (Team lead)</span>
+                <span className="text-slate-500">{isVi ? 'Quản lý phê duyệt' : 'Facilitator'}</span>
+                <span className="font-bold text-slate-900">{isVi ? 'An (Tổ trưởng ca)' : 'An (Team lead)'}</span>
               </div>
               <div className="flex items-center justify-between py-1 border-b border-slate-100">
-                <span className="text-slate-500">Originating Worker</span>
-                <span className="font-semibold text-blue-700">Minh (Question handoff)</span>
+                <span className="text-slate-500">{isVi ? 'Công nhân đề xuất' : 'Originating Worker'}</span>
+                <span className="font-semibold text-blue-700">{isVi ? 'Minh (Đề xuất làm rõ)' : 'Minh (Question handoff)'}</span>
               </div>
               <div className="flex items-center justify-between py-1">
-                <span className="text-slate-500">Work Area</span>
-                <span className="font-semibold text-slate-800">Assembly Line A</span>
+                <span className="text-slate-500">{isVi ? 'Khu vực làm việc' : 'Work Area'}</span>
+                <span className="font-semibold text-slate-800">{isVi ? 'Dây chuyền A' : 'Assembly Line A'}</span>
               </div>
             </div>
 
@@ -281,14 +279,18 @@ export const PublishedInstructionScreen: React.FC = () => {
                 className="py-2 px-3 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 flex items-center justify-center gap-1.5 transition"
               >
                 <Printer className="w-3.5 h-3.5" />
-                <span>Print SOP</span>
+                <span>{isVi ? 'In SOP' : 'Print SOP'}</span>
               </button>
               <button
                 onClick={handleShare}
                 className="py-2 px-3 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl text-xs font-semibold text-slate-700 flex items-center justify-center gap-1.5 transition"
               >
                 <Share2 className="w-3.5 h-3.5" />
-                <span>{shareCopied ? 'Link copied!' : 'Share link'}</span>
+                <span>
+                  {shareCopied
+                    ? (isVi ? 'Đã sao chép!' : 'Link copied!')
+                    : (isVi ? 'Chia sẻ liên kết' : 'Share link')}
+                </span>
               </button>
             </div>
           </div>
@@ -296,27 +298,29 @@ export const PublishedInstructionScreen: React.FC = () => {
           {/* Card 2: Version history */}
           <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs space-y-3">
             <h3 className="font-extrabold text-xs text-slate-900 uppercase tracking-wide">
-              Version history
+              {isVi ? 'Lịch sử phiên bản' : 'Version history'}
             </h3>
 
             <div className="space-y-2.5 text-xs">
               <div className="space-y-0.5">
                 <div className="flex items-center justify-between">
-                  <span className="font-bold text-emerald-700">v2.0 (Current)</span>
-                  <span className="text-[11px] text-slate-400">Today, 10:24 AM</span>
+                  <span className="font-bold text-emerald-700">{isVi ? 'v2.0 (Hiện tại)' : 'v2.0 (Current)'}</span>
+                  <span className="text-[11px] text-slate-400">{isVi ? 'Hôm nay, 10:24 AM' : 'Today, 10:24 AM'}</span>
                 </div>
                 <p className="text-slate-600 text-[11px]">
-                  Updated tray location from A to B based on worker feedback.
+                  {isVi
+                    ? 'Cập nhật vị trí từ Khay A sang Khay B theo đề xuất của công nhân.'
+                    : 'Updated tray location from A to B based on worker feedback.'}
                 </p>
               </div>
 
               <div className="border-t border-slate-100 pt-2 space-y-0.5">
                 <div className="flex items-center justify-between">
                   <span className="font-semibold text-slate-700">v1.0</span>
-                  <span className="text-[11px] text-slate-400">Oct 12, 8:00 AM</span>
+                  <span className="text-[11px] text-slate-400">{isVi ? '12 Th10, 8:00 AM' : 'Oct 12, 8:00 AM'}</span>
                 </div>
                 <p className="text-slate-500 text-[11px]">
-                  Initial standard work publication.
+                  {isVi ? 'Xuất bản quy trình thao tác chuẩn ban đầu.' : 'Initial standard work publication.'}
                 </p>
               </div>
             </div>
@@ -325,10 +329,12 @@ export const PublishedInstructionScreen: React.FC = () => {
           {/* Card 3: Questions or feedback? */}
           <div className="bg-white rounded-2xl p-5 border border-slate-200/90 shadow-xs space-y-3">
             <h3 className="font-extrabold text-xs text-slate-900 uppercase tracking-wide">
-              Questions or feedback?
+              {isVi ? 'Câu hỏi hoặc ý kiến góp ý?' : 'Questions or feedback?'}
             </h3>
             <p className="text-xs text-slate-600 leading-relaxed">
-              Even after publication, you can always ask questions or suggest improvements.
+              {isVi
+                ? 'Ngay cả sau khi xuất bản, bạn vẫn luôn có thể đặt câu hỏi hoặc đề xuất cải tiến quy trình.'
+                : 'Even after publication, you can always ask questions or suggest improvements.'}
             </p>
             <button
               id="published-ask-question-btn"
@@ -336,12 +342,12 @@ export const PublishedInstructionScreen: React.FC = () => {
               className="w-full py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold transition shadow-xs flex items-center justify-center gap-1.5"
             >
               <MessageSquarePlus className="w-4 h-4" />
-              <span>Ask a question</span>
+              <span>{isVi ? 'Gửi câu hỏi' : 'Ask a question'}</span>
             </button>
           </div>
 
           {/* Botanical Corner */}
-          <BotanicalCorner phrase="Together we build better workflows." />
+          <BotanicalCorner phrase={isVi ? 'Cùng nhau xây dựng quy trình làm việc tốt hơn.' : 'Together we build better workflows.'} />
         </div>
       </div>
 
@@ -353,7 +359,7 @@ export const PublishedInstructionScreen: React.FC = () => {
               <div className="flex items-center gap-2">
                 <MessageSquarePlus className="w-5 h-5 text-blue-600" />
                 <h3 className="font-extrabold text-sm text-slate-950">
-                  Ask about this instruction
+                  {isVi ? 'Hỏi về quy trình này' : 'Ask about this instruction'}
                 </h3>
               </div>
               <button
@@ -367,18 +373,20 @@ export const PublishedInstructionScreen: React.FC = () => {
             {followUpSent ? (
               <div className="bg-emerald-50 border border-emerald-200 text-emerald-900 p-4 rounded-xl text-center text-xs font-bold flex items-center justify-center gap-2">
                 <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                <span>Question sent to An (Team lead)!</span>
+                <span>{isVi ? 'Đã gửi câu hỏi tới Quản lý An!' : 'Question sent to An (Team lead)!'}</span>
               </div>
             ) : (
               <form onSubmit={handleSendFollowUp} className="space-y-4">
                 <p className="text-xs text-slate-600">
-                  Have a suggestion or encounter a question on the line? An will receive your message directly.
+                  {isVi
+                    ? 'Có đề xuất hoặc gặp vướng mắc trên dây chuyền? Quản lý An sẽ nhận được tin nhắn trực tiếp từ bạn.'
+                    : 'Have a suggestion or encounter a question on the line? An will receive your message directly.'}
                 </p>
                 <textarea
                   rows={3}
                   value={followUpText}
                   onChange={(e) => setFollowUpText(e.target.value)}
-                  placeholder="Type your question..."
+                  placeholder={isVi ? 'Nhập câu hỏi của bạn...' : 'Type your question...'}
                   className="w-full rounded-xl border border-slate-200 p-3 text-xs focus:outline-hidden focus:ring-2 focus:ring-blue-600 transition resize-none"
                   required
                 />
@@ -388,13 +396,13 @@ export const PublishedInstructionScreen: React.FC = () => {
                     onClick={() => setAskModalOpen(false)}
                     className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100"
                   >
-                    Cancel
+                    {isVi ? 'Hủy' : 'Cancel'}
                   </button>
                   <button
                     type="submit"
                     className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs"
                   >
-                    <span>Send</span>
+                    <span>{isVi ? 'Gửi' : 'Send'}</span>
                     <Send className="w-3.5 h-3.5" />
                   </button>
                 </div>
