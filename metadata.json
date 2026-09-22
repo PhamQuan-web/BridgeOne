@@ -1,0 +1,6 @@
+{
+  "name": "BridgeOne",
+  "description": "Accessible workplace task handoff, visual SOP alignment, and workplace justice platform for inclusive employment.",
+  "requestFramePermissions": ["microphone"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
